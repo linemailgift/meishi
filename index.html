@@ -44,6 +44,8 @@
             background-color: #f8f9fa; 
             min-height: 100vh;
             overscroll-behavior-y: none;
+            /* 重要：横スワイプでのブラウザバック等を防ぎ、アプリ内のスワイプ操作を優先させる */
+            touch-action: pan-y pinch-zoom;
         }
 
         /* ヘッダーのスタイル調整（JSで背景色制御） */
@@ -130,10 +132,10 @@
         .nav-item-wrapper.active .nav-icon { border-color: #4f46e5; opacity: 1; box-shadow: 0 6px 12px rgba(79, 70, 229, 0.4); }
 
         .platform-badge {
-            position: absolute; bottom: -2px; right: -2px; width: 18px; height: 18px;
+            position: absolute; bottom: -2px; right: -2px; width: 22px; height: 22px;
             border-radius: 50%; background-color: white;
             display: flex; align-items: center; justify-content: center;
-            font-size: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); z-index: 10;
+            font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); z-index: 10;
         }
 
         .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 700; }
@@ -144,7 +146,7 @@
         .card-item:active { transform: scale(0.98); }
         .hidden-card { display: none !important; }
         
-        /* リストアイコン（顔写真）のサイズ調整: 60pxに拡大 */
+        /* リストアイコン（顔写真）のサイズ調整: 60px */
         .list-icon { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         
         .focus-icon { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
@@ -168,6 +170,9 @@
         .bg-black { background-color: #000000; }
         .bg-white { background-color: #ffffff; }
         .text-indigo-500 { color: #6366f1; }
+
+        /* X アイコン用の特別なスタイル */
+        .x-icon-text { font-family: sans-serif; font-weight: bold; line-height: 1; }
 
     </style>
 </head>
@@ -399,8 +404,11 @@
 
         window.addEventListener('load', () => {
             loadData();
+            // アドレスバーURL取得とセット
+            initUrlInputs();
+
             if (!localStorage.getItem(TUTORIAL_KEY)) {
-                setTimeout(() => { tutorialModal.classList.remove('hidden'); }, 500);
+                setTimeout(() => { openTutorial(); }, 500);
             } else if (sessionStorage.getItem('open_pwa_guide_after_reload')) {
                 sessionStorage.removeItem('open_pwa_guide_after_reload');
                 setTimeout(() => { showAddToHomeGuide(); }, 500);
@@ -411,6 +419,15 @@
             focusContainer.addEventListener('touchstart', handleTouchStart, {passive: true});
             focusContainer.addEventListener('touchend', handleTouchEnd);
         });
+
+        function initUrlInputs() {
+            const currentUrl = window.location.href.split('#')[0];
+            const ids = ['tut-copy-url', 'copy-pwa-url-input', 'copy-url-input'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = currentUrl;
+            });
+        }
 
         // --- Link Open Logic ---
         function openCurrentLink() {
@@ -447,7 +464,7 @@
         }
 
         function openTutorial() {
-            document.getElementById('tut-copy-url').value = window.location.href.split('#')[0];
+            initUrlInputs();
             tutorialCurrentStep = 1;
             document.querySelectorAll('.tutorial-step').forEach(el => el.classList.add('hidden'));
             document.querySelector('.tutorial-step[data-step="1"]').classList.remove('hidden');
@@ -613,14 +630,12 @@
 
         // --- Common Settings Render ---
         function renderCommonSettings() {
+            // 共通設定タブの中身生成時に、ボタン追加
             settingsContent.innerHTML = `
                 <div class="space-y-6 pb-12">
+                    <!-- ...省略 (アイコン設定等はそのまま) ... -->
                     <div class="bg-white rounded-2xl shadow-sm p-5 border border-indigo-100">
-                        <div class="flex justify-between items-center mb-4 border-b pb-2">
-                            <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider">アプリ設定</h3>
-                            <button onclick="openTutorial()" class="text-xs text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-circle-question mr-1"></i>チュートリアルを見る</button>
-                        </div>
-                        <h4 class="text-xs font-bold text-gray-600 mb-2">ホーム画面用アイコン</h4>
+                        <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4 border-b pb-2">ホーム画面用アイコン</h3>
                         <div class="flex items-center space-x-4 mb-2">
                             <img id="common-app-icon-preview" src="${appData.common?.appIcon || DEFAULT_ICON}" class="w-16 h-16 rounded-xl border border-gray-200 object-cover">
                             <div class="flex flex-col space-y-2">
@@ -634,15 +649,27 @@
                         <input type="hidden" id="setting-common-icon" value="${appData.common?.appIcon || ''}">
                         <p class="text-[10px] text-gray-400 mt-2">※ ここで設定した画像が、ホーム画面に追加した時のアイコンになります。</p>
                     </div>
+                    
+                    <!-- シェア -->
                     <div class="bg-white rounded-2xl shadow-sm p-6 text-center border border-gray-100">
                         <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4"><i class="fa-solid fa-share-nodes mr-2"></i>このアプリをシェア</h3>
                         <div class="bg-gray-50 p-4 rounded-xl inline-block mb-4 border border-gray-200"><div id="share-app-qr" class="qr-code-container"></div></div>
                         <p class="text-[10px] text-gray-400 mb-2">QRコードを読み取ると、現在開いているページを共有できます。</p>
                         <div class="text-[10px] text-gray-300 break-all px-4" id="current-url-display"></div>
                     </div>
+
+                    <!-- アクション (順番変更) -->
                     <div class="grid grid-cols-1 gap-3">
-                        <button onclick="showBookmarkGuide()" class="bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-indigo-700 flex items-center justify-center transform active:scale-95 transition"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> ブラウザで開く / ブックマーク</button>
+                        <button onclick="showBookmarkGuide()" class="bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-indigo-700 flex items-center justify-center transform active:scale-95 transition">
+                            <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> ブラウザで開く / ブックマーク
+                        </button>
+                        <!-- 更新ボタン追加 -->
+                        <button onclick="reloadApp()" class="bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 flex items-center justify-center transform active:scale-95 transition">
+                            <i class="fa-solid fa-rotate mr-2"></i> アプリを更新 (リロード)
+                        </button>
                     </div>
+
+                    <!-- データ管理 -->
                     <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
                         <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">データ管理</h3>
                         <div class="grid grid-cols-2 gap-3">
@@ -654,6 +681,16 @@
             `;
             renderShareQR();
             if(appData.common?.appIcon) document.getElementById('btn-clear-common-icon').classList.remove('hidden');
+            
+            // URL入力欄初期化
+            initUrlInputs();
+        }
+
+        // リロード機能
+        function reloadApp() {
+            if(confirm("ページを再読み込みします。保存していない変更は破棄されますがよろしいですか？")) {
+                 window.location.reload();
+            }
         }
 
         // --- Account/Portfolio Settings Render ---
@@ -747,10 +784,8 @@
             if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
             const diffX = mainTouchStartX - e.changedTouches[0].clientX;
             const diffY = mainTouchStartY - e.changedTouches[0].clientY;
-            // 横スワイプ判定の緩和と、縦スクロール誤爆防止のバランス調整
             if (Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY)) {
-                if (diffX > 0) cycleTab('next');
-                else cycleTab('prev');
+                cycleTab(diffX > 0 ? 'next' : 'prev');
             }
         }
 
@@ -912,7 +947,7 @@
                 
                 // X (Twitter) Badge Logic
                 const isX = k === 'x';
-                const badgeBg = isX ? 'bg-black' : navConfig.badgeBg;
+                const badgeBg = isX ? 'bg-black' : 'bg-white';
                 const badgeColor = isX ? 'text-white' : navConfig.color;
 
                 navHtml += `<div class="nav-item-wrapper ${isActive}" onclick="event.stopPropagation(); switchTo('${k}')">${navIcon}<div class="platform-badge ${badgeBg} ${navConfig.badgeClass}"><i class="${navConfig.icon} ${badgeColor}"></i></div></div>`;
