@@ -124,13 +124,19 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); z-index: 10;
         }
-        
-        /* Xアイコン (画像) - さらに大きく調整 */
-        .platform-badge-img {
-            position: absolute; bottom: -2px; right: -2px; width: 32px; height: 32px; /* 28px -> 32px */
+        /* Xアイコン (画像) */
+        .platform-badge-img-container {
+            position: absolute; bottom: -2px; right: -2px; width: 22px; height: 22px;
             border-radius: 50%;
             box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); z-index: 10;
-            object-fit: cover;
+            background-color: black; /* 背景色を黒に */
+            display: flex; align-items: center; justify-content: center;
+            padding: 4px; /* 内側の余白 */
+            box-sizing: border-box;
+        }
+        .platform-badge-img {
+            width: 100%; height: 100%;
+            object-fit: contain;
         }
 
         .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 700; }
@@ -148,6 +154,15 @@
         .color-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e5e7eb; cursor: pointer; transition: transform 0.2s; }
         .color-btn:hover { transform: scale(1.1); }
         .color-btn.selected { border-color: #4f46e5; transform: scale(1.15); box-shadow: 0 0 0 2px #c7d2fe; }
+        
+        /* カラーピッカーラッパー */
+        .color-picker-wrapper {
+            width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e5e7eb; overflow: hidden; position: relative; cursor: pointer;
+            background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+        }
+        .color-picker-input {
+            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; opacity: 0; cursor: pointer;
+        }
 
         .text-content-white { color: white !important; }
         .text-content-white .text-gray-500 { color: rgba(255,255,255,0.7) !important; }
@@ -202,22 +217,26 @@
         <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden relative">
             <div id="tutorial-steps" class="p-6 text-center min-h-[400px] flex flex-col justify-center items-center">
                 
-                <!-- Step 1: アイコン選択 (New) -->
+                <!-- Step 1: アイコン選択 -->
                 <div class="tutorial-step w-full" data-step="1">
-                    <div class="mb-4 text-indigo-500 text-4xl"><i class="fa-solid fa-palette"></i></div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">アイコンの色を選ぶ</h3>
-                    <p class="text-xs text-gray-500 mb-6">アプリのテーマカラーとアイコンを<br>好きな色に設定しましょう。</p>
+                    <div class="mb-2 text-indigo-500 text-3xl"><i class="fa-solid fa-palette"></i></div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-1">アイコンの色を選ぶ</h3>
+                    <p class="text-[10px] text-gray-500 mb-4">テーマカラーとアイコンの色を設定</p>
                     
-                    <!-- カラーピッカー -->
-                    <div class="flex flex-wrap justify-center gap-4 mb-4">
-                        <button onclick="selectTutorialColor('#60A5FA')" class="color-btn transform hover:scale-110" style="background-color: #60A5FA;"></button> <!-- Blue -->
-                        <button onclick="selectTutorialColor('#F87171')" class="color-btn transform hover:scale-110" style="background-color: #F87171;"></button> <!-- Red -->
-                        <button onclick="selectTutorialColor('#FBBF24')" class="color-btn transform hover:scale-110" style="background-color: #FBBF24;"></button> <!-- Yellow -->
-                        <button onclick="selectTutorialColor('#34D399')" class="color-btn transform hover:scale-110" style="background-color: #34D399;"></button> <!-- Green -->
-                        <button onclick="selectTutorialColor('#F472B6')" class="color-btn transform hover:scale-110" style="background-color: #F472B6;"></button> <!-- Pink -->
-                        <button onclick="selectTutorialColor('#1F2937')" class="color-btn transform hover:scale-110" style="background-color: #1F2937;"></button> <!-- Black -->
+                    <!-- パステルカラーピッカー (白 + パステル3色 + 黒) -->
+                    <div class="flex flex-wrap justify-center gap-3 mb-4">
+                        <button onclick="selectTutorialColor('#FFFFFF')" class="color-btn border border-gray-200" style="background-color: #FFFFFF;" title="White"></button>
+                        <button onclick="selectTutorialColor('#F0F9FF')" class="color-btn" style="background-color: #F0F9FF;" title="Ice Blue"></button>
+                        <button onclick="selectTutorialColor('#FFF1F2')" class="color-btn" style="background-color: #FFF1F2;" title="Ice Pink"></button>
+                        <button onclick="selectTutorialColor('#F0FDF4')" class="color-btn" style="background-color: #F0FDF4;" title="Ice Green"></button>
+                        <button onclick="selectTutorialColor('#1F2937')" class="color-btn" style="background-color: #1F2937;" title="Black"></button>
+                        
+                        <!-- 自由選択 -->
+                        <div class="color-picker-wrapper" style="width:28px; height:28px; align-self:center;" title="自由選択">
+                            <input type="color" class="color-picker-input" onchange="selectTutorialColor(this.value)">
+                        </div>
                     </div>
-                    <div id="tut-icon-preview" class="flex justify-center mt-4">
+                    <div id="tut-icon-preview" class="flex justify-center mt-2">
                         <!-- ここにSVGアイコンがプレビュー表示されます -->
                     </div>
                 </div>
@@ -271,20 +290,23 @@
                 <h2 class="font-bold text-gray-700">設定</h2>
                 <button onclick="closeSettings()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
+            <!-- 設定内のタブ切り替え -->
             <div class="flex border-b bg-white overflow-x-auto scrollbar-hide items-end px-1 pt-2 gap-1">
                 <button onclick="switchSettingsTab('account1')" id="set-tab-account1" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center rounded-t-lg transition-all">Account 1</button>
                 <button onclick="switchSettingsTab('account2')" id="set-tab-account2" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center rounded-t-lg transition-all">Account 2</button>
                 <button onclick="switchSettingsTab('portfolio')" id="set-tab-portfolio" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center rounded-t-lg transition-all">Portfolio</button>
                 <button onclick="switchSettingsTab('common')" id="set-tab-common" class="flex-1 min-w-[50px] py-3 text-xs font-bold text-center rounded-t-lg transition-all bg-gray-200 text-gray-600">共通</button>
             </div>
-            <div class="flex-1 overflow-y-auto p-4 bg-gray-50" id="settings-content-wrapper"></div>
+            <div class="flex-1 overflow-y-auto p-4 bg-gray-50" id="settings-content-wrapper">
+                <!-- コンテンツはJSで注入 -->
+            </div>
             <div class="p-4 border-t bg-white rounded-b-2xl shadow-inner z-10">
                 <button onclick="saveAndRegenerate()" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-indigo-700 transform active:scale-95 transition flex justify-center items-center"><i class="fa-solid fa-check mr-2"></i> 保存して更新</button>
             </div>
         </div>
     </div>
 
-    <!-- ホーム画面追加ガイド / ブックマークガイド (省略なし) -->
+    <!-- ホーム画面追加ガイドモーダル -->
     <div id="pwa-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeAddToHomeGuide()">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
             <button onclick="closeAddToHomeGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
@@ -307,6 +329,7 @@
         </div>
     </div>
 
+    <!-- ブックマークガイド -->
     <div id="bookmark-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeBookmarkGuide()">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
             <button onclick="closeBookmarkGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
@@ -371,28 +394,29 @@
         let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0, currentFocusKey = null;
         let mainTouchStartX = 0, mainTouchStartY = 0;
         let tutorialCurrentStep = 1;
-        let selectedTutorialColor = '#60A5FA'; // Default blue
+        let selectedTutorialColor = '#FFFFFF';
 
-        // アイコン生成用SVGテンプレート
+        // アイコン生成用SVGテンプレート (カード3枚重ね) - 角丸を削除
         function generateIconSvg(color) {
             return `data:image/svg+xml;base64,${btoa(`
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                <rect width="512" height="512" fill="${color}" rx="128" ry="128"/>
-                <g transform="translate(60, 160)">
-                    <rect x="40" y="0" width="320" height="220" rx="16" fill="rgba(255,255,255,0.4)" transform="rotate(-5 160 110)"/>
-                    <rect x="20" y="10" width="320" height="220" rx="16" fill="rgba(255,255,255,0.7)" transform="rotate(-2 160 110)"/>
-                    <rect x="0" y="20" width="320" height="220" rx="16" fill="white"/>
-                    <circle cx="90" cy="110" r="45" fill="#ccc"/>
-                    <path d="M90 160c-30 0-55 20-55 45h110c0-25-25-45-55-45z" fill="#ccc"/>
-                    <rect x="160" y="70" width="120" height="20" rx="5" fill="#ccc"/>
-                    <rect x="160" y="110" width="120" height="20" rx="5" fill="#ccc"/>
-                    <rect x="160" y="150" width="80" height="20" rx="5" fill="#ccc"/>
+                <rect width="512" height="512" fill="${color}"/>
+                <g transform="translate(256, 256)">
+                    <g transform="translate(-160, -110)">
+                        <rect x="20" y="20" width="320" height="220" fill="rgba(255,255,255,0.4)" transform="rotate(10 160 110)"/>
+                        <rect x="10" y="10" width="320" height="220" fill="rgba(255,255,255,0.7)" transform="rotate(5 160 110)"/>
+                        <rect x="0" y="0" width="320" height="220" fill="white"/>
+                        <circle cx="90" cy="90" r="45" fill="#ccc"/>
+                        <path d="M90 140c-30 0-55 20-55 45h110c0-25-25-45-55-45z" fill="#ccc"/>
+                        <rect x="160" y="50" width="120" height="20" rx="5" fill="#ccc"/>
+                        <rect x="160" y="90" width="120" height="20" rx="5" fill="#ccc"/>
+                        <rect x="160" y="130" width="80" height="20" rx="5" fill="#ccc"/>
+                    </g>
                 </g>
             </svg>`.trim())}`;
         }
 
-        // 初期アイコン設定
-        const INITIAL_ICON = generateIconSvg('#60A5FA');
+        const INITIAL_ICON = generateIconSvg('#FFFFFF');
 
         const focusContainer = document.getElementById('focus-view-container');
         const focusCardEl = document.getElementById('focus-card');
@@ -416,13 +440,8 @@
         window.addEventListener('load', () => {
             loadData();
             initUrlInputs();
-            // チュートリアル関連
-            if (!localStorage.getItem(TUTORIAL_KEY)) { 
-                setTimeout(() => { openTutorial(); }, 500); 
-            } else if (sessionStorage.getItem('open_pwa_guide_after_reload')) { 
-                sessionStorage.removeItem('open_pwa_guide_after_reload'); 
-                setTimeout(() => { showAddToHomeGuide(); }, 500); 
-            }
+            if (!localStorage.getItem(TUTORIAL_KEY)) { setTimeout(() => { openTutorial(); }, 500); } 
+            else if (sessionStorage.getItem('open_pwa_guide_after_reload')) { sessionStorage.removeItem('open_pwa_guide_after_reload'); setTimeout(() => { showAddToHomeGuide(); }, 500); }
             
             document.addEventListener('touchstart', handleMainTouchStart, {passive: false});
             document.addEventListener('touchmove', handleMainTouchMove, {passive: false});
@@ -470,24 +489,18 @@
 
         function nextTutorialStep() {
             if (tutorialCurrentStep === 1) {
-                // 選択した色を適用
                 const iconData = generateIconSvg(selectedTutorialColor);
                 if(!appData.common) appData.common = {};
                 appData.common.appIcon = iconData;
-                
-                // 各アカウントのテーマカラーも一括設定（ユーザーが楽なように）
                 ['account1', 'account2', 'portfolio'].forEach(tab => {
                     if(!appData[tab]) appData[tab] = { config: {} };
                     if(!appData[tab].config) appData[tab].config = {};
-                    appData[tab].config.themeColor = selectedTutorialColor; // 選択した色を薄くするなど調整しても良いが、まずはそのまま
+                    appData[tab].config.themeColor = selectedTutorialColor;
                 });
-                
-                // 保存して反映
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
                 updateAppIcons();
                 applyTheme(selectedTutorialColor);
             }
-
             document.querySelector(`.tutorial-step[data-step="${tutorialCurrentStep}"]`).classList.add('hidden');
             document.getElementById(`dot-${tutorialCurrentStep}`).classList.replace('bg-indigo-600', 'bg-gray-300');
             tutorialCurrentStep++;
@@ -518,10 +531,7 @@
             document.getElementById('tutorial-next-btn').classList.remove('hidden');
             document.getElementById('tutorial-close-btn').classList.add('hidden');
             document.getElementById('tutorial-dont-show').checked = false;
-            
-            // プレビュー初期化
-            selectTutorialColor('#60A5FA');
-            
+            selectTutorialColor('#FFFFFF');
             tutorialModal.classList.remove('hidden');
         }
         
@@ -607,7 +617,7 @@
                     
                     const isX = key === 'x';
                     const badgeIconHtml = isX 
-                        ? `<img src="${X_ICON_BASE64}" class="platform-badge-img">` 
+                        ? `<div class="platform-badge-img-container"><img src="${X_ICON_BASE64}" class="platform-badge-img"></div>` 
                         : `<div class="absolute -bottom-2 -right-4 bg-white rounded-full p-1 shadow-sm border border-gray-100 z-10"><i class="${config.icon} ${config.color} text-xl w-7 h-7 flex items-center justify-center"></i></div>`;
 
                     const itemHtml = `
@@ -631,7 +641,6 @@
         }
 
         function renderCommonSettings() {
-            // アイコン設定部分をプリセット選択式に変更
             settingsContent.innerHTML = `
                 <div class="space-y-6 pb-12">
                     <div class="bg-white rounded-2xl shadow-sm p-5 border border-indigo-100">
@@ -646,12 +655,14 @@
                             <div class="flex-1">
                                 <p class="text-[10px] text-gray-400 mb-2">カラーを選択:</p>
                                 <div class="flex flex-wrap gap-2">
-                                    <button onclick="setPresetIcon('#60A5FA')" class="color-btn" style="background-color:#60A5FA; width:28px; height:28px;"></button>
-                                    <button onclick="setPresetIcon('#F87171')" class="color-btn" style="background-color:#F87171; width:28px; height:28px;"></button>
-                                    <button onclick="setPresetIcon('#FBBF24')" class="color-btn" style="background-color:#FBBF24; width:28px; height:28px;"></button>
-                                    <button onclick="setPresetIcon('#34D399')" class="color-btn" style="background-color:#34D399; width:28px; height:28px;"></button>
-                                    <button onclick="setPresetIcon('#F472B6')" class="color-btn" style="background-color:#F472B6; width:28px; height:28px;"></button>
+                                    <button onclick="setPresetIcon('#FFFFFF')" class="color-btn border border-gray-200" style="background-color:#FFFFFF; width:28px; height:28px;"></button>
+                                    <button onclick="setPresetIcon('#F0F9FF')" class="color-btn" style="background-color:#F0F9FF; width:28px; height:28px;"></button>
+                                    <button onclick="setPresetIcon('#FFF1F2')" class="color-btn" style="background-color:#FFF1F2; width:28px; height:28px;"></button>
+                                    <button onclick="setPresetIcon('#F0FDF4')" class="color-btn" style="background-color:#F0FDF4; width:28px; height:28px;"></button>
                                     <button onclick="setPresetIcon('#1F2937')" class="color-btn" style="background-color:#1F2937; width:28px; height:28px;"></button>
+                                    <div class="color-picker-wrapper" style="width:28px; height:28px;" title="自由選択">
+                                        <input type="color" class="color-picker-input" onchange="setPresetIcon(this.value)">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -678,13 +689,10 @@
                         <div class="text-[10px] text-gray-300 break-all px-4" id="current-url-display"></div>
                     </div>
 
-                    <!-- アクション -->
                     <div class="grid grid-cols-1 gap-3">
                         <button onclick="showBookmarkGuide()" class="bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-indigo-700 flex items-center justify-center transform active:scale-95 transition"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> ブラウザで開く / ブックマーク</button>
                         <button onclick="reloadApp()" class="bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 flex items-center justify-center transform active:scale-95 transition"><i class="fa-solid fa-rotate mr-2"></i> アプリを更新 (リロード)</button>
                     </div>
-
-                    <!-- データ管理 -->
                     <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
                         <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">データ管理</h3>
                         <div class="grid grid-cols-2 gap-3">
@@ -695,21 +703,17 @@
                 </div>
             `;
             renderShareQR();
-            // カスタムアイコンがあればリセットボタン表示
             if(appData.common?.appIcon && appData.common.appIcon.length > 1000) {
                  document.getElementById('btn-clear-common-icon').classList.remove('hidden');
             }
             initUrlInputs();
         }
 
-        // プリセットアイコン設定
         function setPresetIcon(color) {
             const iconData = generateIconSvg(color);
             document.getElementById('setting-common-icon').value = iconData;
             document.getElementById('common-app-icon-preview').src = iconData;
             document.getElementById('btn-clear-common-icon').classList.remove('hidden');
-            
-            // 即時反映用
             if(!appData.common) appData.common = {};
             appData.common.appIcon = iconData;
         }
@@ -724,8 +728,10 @@
                     <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4 border-b pb-2">基本設定</h3>
                     <div class="mb-5"><label class="block text-xs font-bold text-gray-600 mb-1">タブの名称</label><input type="text" id="setting-tab-name" value="${tabConfig.tabName || ''}" placeholder="例: 本垢, Portfolio" class="w-full text-sm p-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition"></div>
                     <div class="mb-5">
-                        <label class="block text-xs font-bold text-gray-600 mb-2">アプリ全体のテーマカラー</label>
-                        <div class="flex flex-wrap gap-3 mb-2">${renderColorBtn('#f8f9fa')}${renderColorBtn('#e0f2fe')}${renderColorBtn('#fce7f3')}${renderColorBtn('#ecfccb')}${renderColorBtn('#1f2937')}</div>
+                        <label class="block text-xs font-bold text-gray-600 mb-2">タブのカラー</label>
+                        <div class="flex flex-wrap gap-3 mb-2">
+                            ${renderColorBtn('#FFFFFF')}${renderColorBtn('#F0F9FF')}${renderColorBtn('#FFF1F2')}${renderColorBtn('#F0FDF4')}${renderColorBtn('#1F2937')}
+                        </div>
                         <div class="flex items-center space-x-2"><input type="color" id="custom-theme-color" onchange="setThemeColor(this.value)" class="h-8 w-12 p-0 border rounded cursor-pointer"><span class="text-xs text-gray-500">カスタム色</span></div>
                         <input type="hidden" id="setting-theme-color" value="${tabConfig.themeColor || '#f8f9fa'}">
                     </div>
@@ -753,7 +759,10 @@
             updateColorButtons(tabConfig.themeColor || '#f8f9fa');
         }
 
-        function renderColorBtn(color) { return `<button onclick="setThemeColor('${color}')" class="color-btn" style="background-color: ${color};" title="${color}"></button>`; }
+        function renderColorBtn(color) { 
+            const borderClass = color === '#FFFFFF' ? 'border border-gray-200' : '';
+            return `<button onclick="setThemeColor('${color}')" class="color-btn ${borderClass}" style="background-color: ${color};" title="${color}"></button>`; 
+        }
         function handleCommonIconUpload(input) { processImage(input, 192, 0.9, (d) => { document.getElementById('setting-common-icon').value = d; document.getElementById('common-app-icon-preview').src = d; document.getElementById('btn-clear-common-icon').classList.remove('hidden'); if(!appData.common) appData.common = {}; appData.common.appIcon = d; }); }
         function clearCommonIcon() { document.getElementById('setting-common-icon').value = ''; document.getElementById('common-app-icon-preview').src = INITIAL_ICON; document.getElementById('btn-clear-common-icon').classList.add('hidden'); if(appData.common) appData.common.appIcon = ''; }
         
@@ -766,13 +775,13 @@
              if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
              const diffX = e.touches[0].clientX - mainTouchStartX;
              const diffY = e.touches[0].clientY - mainTouchStartY;
-             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) { e.preventDefault(); }
+             if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) { e.preventDefault(); }
         }
         function handleMainTouchEnd(e) {
             if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
             const diffX = mainTouchStartX - e.changedTouches[0].clientX;
             const diffY = mainTouchStartY - e.changedTouches[0].clientY;
-            if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) { cycleTab(diffX > 0 ? 'next' : 'prev'); }
+            if (Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY)) { cycleTab(diffX > 0 ? 'next' : 'prev'); }
             mainTouchStartX = 0; mainTouchStartY = 0;
         }
 
@@ -854,7 +863,7 @@
                 // X (Twitter) Badge Logic
                 const isX = k === 'x';
                 const badgeIconHtml = isX 
-                    ? `<img src="${X_ICON_BASE64}" class="platform-badge-img">`
+                    ? `<div class="platform-badge-img-container" style="bottom:-2px; right:-2px;"><img src="${X_ICON_BASE64}" class="platform-badge-img"></div>`
                     : `<div class="platform-badge ${navConfig.badgeBg} ${navConfig.badgeClass}"><i class="${navConfig.icon}"></i></div>`;
                 
                 navHtml += `<div class="nav-item-wrapper ${isActive}" onclick="event.stopPropagation(); switchTo('${k}')">${navIcon}${badgeIconHtml}</div>`;
