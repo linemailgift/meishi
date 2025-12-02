@@ -284,7 +284,30 @@
         </div>
     </div>
 
-    <!-- ブックマークガイド (汎用) -->
+    <!-- ホーム画面追加ガイドモーダル -->
+    <div id="pwa-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeAddToHomeGuide()">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
+            <button onclick="closeAddToHomeGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
+            <div class="text-center mb-6"><i class="fa-solid fa-share-nodes text-4xl text-indigo-500 mb-3"></i><h3 class="text-lg font-bold text-gray-800">ホーム画面に追加</h3><p class="text-xs text-gray-500 mt-1">アイコン付きでアプリとして使えます</p></div>
+            <div class="space-y-4 text-sm text-gray-600">
+                <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100">
+                    <p class="text-xs text-yellow-800 font-bold mb-2"><i class="fa-solid fa-circle-exclamation mr-1"></i> アプリモードで開いている場合</p>
+                    <p class="text-xs mb-3">この画面には共有ボタンがありません。<br>以下の手順でブラウザを開いてください。</p>
+                    <div class="flex items-center gap-2 mb-2"><input type="text" id="copy-pwa-url-input" class="w-full bg-white border border-gray-300 text-xs p-2 rounded text-gray-600" readonly><button onclick="copyPwaUrl()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-indigo-700 whitespace-nowrap">コピー</button></div>
+                    <p id="copy-pwa-msg" class="text-[10px] text-green-600 h-4 hidden text-center mb-2">コピーしました！</p>
+                    <ol class="list-decimal list-inside space-y-1 pl-1 text-xs"><li><strong>Safari/Chrome</strong>アプリを自分で開く</li><li>アドレスバーにURLを貼り付けて開く</li><li>その画面で「共有」→「ホーム画面に追加」</li></ol>
+                </div>
+                <div class="border-t pt-4">
+                    <h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-apple text-lg mr-2"></i> iPhone (Safari)</h4>
+                    <p class="text-xs text-gray-500">ブラウザで開いている場合:</p>
+                    <ol class="list-decimal list-inside space-y-1 pl-1 text-xs"><li>画面下の共有ボタン <i class="fa-solid fa-arrow-up-from-bracket mx-1"></i> をタップ</li><li>メニューから「ホーム画面に追加」を選択</li></ol>
+                </div>
+            </div>
+            <div class="mt-6 text-center"><button onclick="closeAddToHomeGuide()" class="bg-gray-100 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200">閉じる</button></div>
+        </div>
+    </div>
+
+    <!-- ブックマークガイド -->
     <div id="bookmark-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeBookmarkGuide()">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
             <button onclick="closeBookmarkGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
@@ -294,20 +317,7 @@
                 <div class="flex items-center gap-2"><input type="text" id="copy-url-input" class="w-full bg-white border border-gray-300 text-xs p-2 rounded text-gray-600" readonly><button onclick="copyCurrentUrl()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-indigo-700 whitespace-nowrap">コピー</button></div>
                 <p id="copy-message" class="text-[10px] text-green-600 mt-1 h-4 hidden text-center">URLをコピーしました！</p>
             </div>
-            <div class="space-y-4 text-sm text-gray-600">
-                <div class="border-t pt-3">
-                    <h4 class="font-bold text-gray-800 mb-1"><i class="fa-brands fa-safari text-blue-500 mr-1"></i> Safari / Chromeで開く</h4>
-                    <ol class="list-decimal list-inside text-xs pl-1 space-y-1">
-                        <li>上の「コピー」ボタンを押す</li>
-                        <li>ブラウザアプリを開く</li>
-                        <li>アドレスバーに貼り付けて移動</li>
-                    </ol>
-                </div>
-                <div class="border-t pt-3">
-                    <h4 class="font-bold text-gray-800 mb-1"><i class="fa-solid fa-star text-yellow-500 mr-1"></i> ブックマーク / ホームに追加</h4>
-                    <p class="text-xs">ブラウザで開いた後、共有ボタン <i class="fa-solid fa-arrow-up-from-bracket"></i> やメニューから登録してください。</p>
-                </div>
-            </div>
+            <div class="space-y-4 text-sm text-gray-600"><p class="text-xs bg-yellow-50 p-2 rounded text-yellow-800 border border-yellow-100"><i class="fa-solid fa-circle-info mr-1"></i>アプリモードでは直接ブラウザを開けません。<br><strong>URLをコピーして、SafariやChromeのアドレスバーに貼り付けて開いてください。</strong></p></div>
             <div class="mt-6 text-center"><button onclick="closeBookmarkGuide()" class="bg-gray-100 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200">閉じる</button></div>
         </div>
     </div>
@@ -333,7 +343,7 @@
 
     <script>
         const STORAGE_KEY = 'chiikuji_meishi_release_v2';
-        const TUTORIAL_KEY = 'chiikuji_meishi_tutorial_done_v2'; // Key update to force tutorial
+        const TUTORIAL_KEY = 'chiikuji_meishi_tutorial_done_v2'; 
         const DEFAULT_ICON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=";
         
         const accountPlatformKeys = ['youtube1', 'youtube2', 'instagram', 'x', 'tiktok', 'facebook', 'homepage', 'blog'];
@@ -389,9 +399,11 @@
 
         window.addEventListener('load', () => {
             loadData();
-            // チュートリアル強制表示 (Key更新済み)
             if (!localStorage.getItem(TUTORIAL_KEY)) {
-                setTimeout(() => { openTutorial(); }, 500);
+                setTimeout(() => { tutorialModal.classList.remove('hidden'); }, 500);
+            } else if (sessionStorage.getItem('open_pwa_guide_after_reload')) {
+                sessionStorage.removeItem('open_pwa_guide_after_reload');
+                setTimeout(() => { showAddToHomeGuide(); }, 500);
             }
             
             document.addEventListener('touchstart', handleMainTouchStart, {passive: false});
@@ -435,9 +447,7 @@
         }
 
         function openTutorial() {
-            // URLをセット
             document.getElementById('tut-copy-url').value = window.location.href.split('#')[0];
-            
             tutorialCurrentStep = 1;
             document.querySelectorAll('.tutorial-step').forEach(el => el.classList.add('hidden'));
             document.querySelector('.tutorial-step[data-step="1"]').classList.remove('hidden');
@@ -574,14 +584,19 @@
                     const cardColor = item.cardBgColor || '#ffffff';
                     const textColorClass = isDarkColor(cardColor) ? 'text-content-white' : '';
                     
+                    // X (Twitter) Icon Logic
+                    const isX = key === 'x';
+                    const badgeBg = isX ? 'bg-black' : 'bg-white';
+                    const badgeColor = isX ? 'text-white' : config.color;
+
                     const itemHtml = `
                         <div id="card-${key}" class="card-item rounded-xl shadow-sm p-2 flex items-center space-x-3 cursor-pointer border border-white/50 ${textColorClass}" 
                              style="background-color: ${cardColor};" onclick="focusCard('${key}')">
                             <div class="relative flex-shrink-0">
                                 <img id="icon-${key}" src="${item.image || ''}" class="list-icon ${item.image ? '' : 'hidden'} bg-gray-50">
                                 <div id="no-icon-${key}" class="list-icon ${item.image ? 'hidden' : ''} bg-gray-50 flex items-center justify-center text-gray-300 text-2xl"><i class="fa-solid fa-user"></i></div>
-                                <div class="absolute -bottom-2 -right-4 bg-white rounded-full p-1 shadow-sm border border-gray-100 z-10">
-                                    <i class="${config.icon} ${config.color} text-xl w-7 h-7 flex items-center justify-center"></i>
+                                <div class="absolute -bottom-2 -right-4 ${badgeBg} rounded-full p-1 shadow-sm border border-gray-100 z-10">
+                                    <i class="${config.icon} ${badgeColor} text-xl w-7 h-7 flex items-center justify-center"></i>
                                 </div>
                             </div>
                             <div class="flex-1 min-w-0 pl-2">
@@ -732,8 +747,10 @@
             if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
             const diffX = mainTouchStartX - e.changedTouches[0].clientX;
             const diffY = mainTouchStartY - e.changedTouches[0].clientY;
-            if (Math.abs(diffX) > 50 && Math.abs(diffY) < 50) {
-                cycleTab(diffX > 0 ? 'next' : 'prev');
+            // 横スワイプ判定の緩和と、縦スクロール誤爆防止のバランス調整
+            if (Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY)) {
+                if (diffX > 0) cycleTab('next');
+                else cycleTab('prev');
             }
         }
 
@@ -837,9 +854,7 @@
         function rgbToHex(rgb) { if(!rgb)return ''; if(rgb.startsWith('#'))return rgb.toLowerCase(); const v = rgb.match(/\d+/g); if(!v)return rgb; return "#"+((1<<24)+(parseInt(v[0])<<16)+(parseInt(v[1])<<8)+parseInt(v[2])).toString(16).slice(1).toLowerCase(); }
         function applyTheme(c) { 
             appHeader.style.backgroundColor = c; 
-            // ここでbodyの背景色も変更
-            document.body.style.backgroundColor = c;
-            
+            document.body.style.backgroundColor = c; // Body background update
             const d = isDarkColor(c);
             const contentColor = d ? 'white' : '#374151';
             appTitle.style.color = contentColor;
@@ -873,12 +888,7 @@
             const cardColor = item.cardBgColor || '#ffffff';
             focusCardEl.style.backgroundColor = cardColor;
             
-            // カードの文字色調整
-            if(isDarkColor(cardColor)) {
-                focusCardEl.classList.add('text-content-white');
-            } else {
-                focusCardEl.classList.remove('text-content-white');
-            }
+            if(isDarkColor(cardColor)) { focusCardEl.classList.add('text-content-white'); } else { focusCardEl.classList.remove('text-content-white'); }
 
             focusCardEl.className = `meishi-card ${isDarkColor(cardColor) ? 'text-content-white' : ''}`;
             void focusCardEl.offsetWidth;
@@ -899,7 +909,13 @@
                 const navItem = data[k]; const isActive = k === key ? 'active' : '';
                 const navConfig = platformConfig[k];
                 let navIcon = navItem.image ? `<img src="${navItem.image}" class="nav-icon">` : `<div class="nav-icon flex items-center justify-center text-gray-400 text-lg"><i class="fa-solid fa-user"></i></div>`;
-                navHtml += `<div class="nav-item-wrapper ${isActive}" onclick="event.stopPropagation(); switchTo('${k}')">${navIcon}<div class="platform-badge ${navConfig.badgeBg} ${navConfig.badgeClass}"><i class="${navConfig.icon}"></i></div></div>`;
+                
+                // X (Twitter) Badge Logic
+                const isX = k === 'x';
+                const badgeBg = isX ? 'bg-black' : navConfig.badgeBg;
+                const badgeColor = isX ? 'text-white' : navConfig.color;
+
+                navHtml += `<div class="nav-item-wrapper ${isActive}" onclick="event.stopPropagation(); switchTo('${k}')">${navIcon}<div class="platform-badge ${badgeBg} ${navConfig.badgeClass}"><i class="${navConfig.icon} ${badgeColor}"></i></div></div>`;
             });
             focusBottomNav.innerHTML = navHtml;
         }
