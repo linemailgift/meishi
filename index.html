@@ -7,9 +7,31 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chiikuji Meishi">
     <title>Chiikuji Meishi</title>
+    
+    <!-- デフォルトアイコン -->
     <link rel="apple-touch-icon" id="app-icon-apple" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=">
     <link rel="shortcut icon" id="app-icon-default" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=">
     
+    <!-- アイコン設定即時反映 -->
+    <script>
+        (function() {
+            try {
+                const STORAGE_KEY = 'chiikuji_meishi_release_v2';
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    const icon = data.common?.appIcon;
+                    if (icon) {
+                        const appleIcon = document.getElementById('app-icon-apple');
+                        const defaultIcon = document.getElementById('app-icon-default');
+                        if (appleIcon) appleIcon.href = icon;
+                        if (defaultIcon) defaultIcon.href = icon;
+                    }
+                }
+            } catch(e) {}
+        })();
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -22,6 +44,19 @@
             background-color: #f8f9fa; 
             min-height: 100vh;
             overscroll-behavior-y: none;
+        }
+
+        /* ヘッダーのスタイル調整（JSで背景色制御） */
+        header {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* タブボタンの基本スタイル */
+        .tab-btn {
+            transition: all 0.3s ease;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            margin: 0 2px;
         }
 
         /* --- 拡大ビュー --- */
@@ -91,9 +126,6 @@
             font-size: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); z-index: 10;
         }
 
-        .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 700; }
-        .tab-inactive { border-bottom: 3px solid transparent; color: #9ca3af; font-weight: 500; }
-
         .list-item { transition: transform 0.2s, box-shadow 0.2s; backdrop-filter: blur(4px); }
         .list-item:active { transform: scale(0.98); }
         .hidden-card { display: none !important; }
@@ -125,15 +157,15 @@
 </head>
 <body id="app-body" class="pb-20">
 
-    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30 pt-3 pb-0">
+    <header id="app-header" class="shadow-sm sticky top-0 z-30 pt-3 pb-0">
         <div class="max-w-md mx-auto px-4 flex justify-between items-center mb-3">
-            <h1 class="text-xs text-gray-400 font-light tracking-widest uppercase">Chiikuji Meishi</h1>
-            <button onclick="openSettings()" id="header-settings-btn" class="text-gray-400 hover:text-gray-600 p-2"><i class="fa-solid fa-gear text-lg"></i></button>
+            <h1 id="app-title" class="text-xs font-light tracking-widest uppercase">Chiikuji Meishi</h1>
+            <button onclick="openSettings()" id="header-settings-btn" class="p-2 transition-opacity hover:opacity-70"><i class="fa-solid fa-gear text-lg"></i></button>
         </div>
-        <div class="flex max-w-md mx-auto w-full px-2">
-            <button onclick="switchTab('account1')" id="tab-btn-account1" class="flex-1 py-3 text-xs sm:text-sm text-center transition tab-active truncate px-1">Account 1</button>
-            <button onclick="switchTab('account2')" id="tab-btn-account2" class="flex-1 py-3 text-xs sm:text-sm text-center transition tab-inactive truncate px-1">Account 2</button>
-            <button onclick="switchTab('portfolio')" id="tab-btn-portfolio" class="flex-1 py-3 text-xs sm:text-sm text-center transition tab-inactive truncate px-1 font-bold text-gray-500">Portfolio</button>
+        <div class="flex max-w-md mx-auto w-full px-2 items-end">
+            <button onclick="switchTab('account1')" id="tab-btn-account1" class="tab-btn flex-1 py-3 text-xs sm:text-sm text-center truncate px-1">Account 1</button>
+            <button onclick="switchTab('account2')" id="tab-btn-account2" class="tab-btn flex-1 py-3 text-xs sm:text-sm text-center truncate px-1">Account 2</button>
+            <button onclick="switchTab('portfolio')" id="tab-btn-portfolio" class="tab-btn flex-1 py-3 text-xs sm:text-sm text-center truncate px-1 font-bold">Portfolio</button>
         </div>
     </header>
 
@@ -148,6 +180,47 @@
         <div id="qr-list" class="space-y-3 pb-8"></div>
     </main>
 
+    <!-- チュートリアルモーダル -->
+    <div id="tutorial-modal" class="hidden fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden relative">
+            <div id="tutorial-steps" class="p-6 text-center min-h-[320px] flex flex-col justify-center items-center">
+                <!-- Step 1 -->
+                <div class="tutorial-step" data-step="1">
+                    <div class="mb-4 text-indigo-500 text-5xl"><i class="fa-solid fa-gear"></i></div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">まずは設定から</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">右上の歯車ボタン <i class="fa-solid fa-gear text-xs"></i> をタップして、<br>あなたのSNSリンクやプロフィール画像、<br>テーマカラーを設定しましょう。</p>
+                </div>
+                <!-- Step 2 -->
+                <div class="tutorial-step hidden" data-step="2">
+                    <div class="mb-4 text-pink-500 text-5xl"><i class="fa-solid fa-hand-pointer"></i></div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">タップして拡大</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">リストをタップすると拡大表示されます。<br>拡大画面では<span class="font-bold text-indigo-500">左右スワイプ</span>で<br>他のSNSに素早く切り替えられます。</p>
+                </div>
+                <!-- Step 3 -->
+                <div class="tutorial-step hidden" data-step="3">
+                    <div class="mb-4 text-green-500 text-5xl"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">アプリとして使う</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">設定の「共通」タブから<br>ホーム画面に追加したり、<br><strong>データのバックアップ</strong>もここから行えます。</p>
+                    <p class="text-xs text-gray-400 mt-4 border-t pt-2 border-gray-100">※チュートリアルは設定の「共通」タブから<br>いつでも見返せます。</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 p-4 border-t border-gray-100">
+                <div class="flex justify-center space-x-2 mb-4">
+                    <span class="dot w-2 h-2 rounded-full bg-indigo-600 transition-colors" id="dot-1"></span>
+                    <span class="dot w-2 h-2 rounded-full bg-gray-300 transition-colors" id="dot-2"></span>
+                    <span class="dot w-2 h-2 rounded-full bg-gray-300 transition-colors" id="dot-3"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <label class="flex items-center text-xs text-gray-500 cursor-pointer select-none">
+                        <input type="checkbox" id="tutorial-dont-show" class="mr-2 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">次回から表示しない
+                    </label>
+                    <button id="tutorial-next-btn" onclick="nextTutorialStep()" class="bg-indigo-600 text-white text-sm font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition">次へ</button>
+                    <button id="tutorial-close-btn" onclick="closeTutorial()" class="hidden bg-indigo-600 text-white text-sm font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition">始める</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 設定モーダル -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md h-[90vh] flex flex-col">
@@ -155,12 +228,12 @@
                 <h2 class="font-bold text-gray-700">設定</h2>
                 <button onclick="closeSettings()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
-            <!-- 設定内のタブ切り替え (4つ) -->
-            <div class="flex border-b bg-white overflow-x-auto scrollbar-hide">
-                <button onclick="switchSettingsTab('account1')" id="set-tab-account1" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50 px-1">Account 1</button>
-                <button onclick="switchSettingsTab('account2')" id="set-tab-account2" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center border-b-2 border-transparent text-gray-500 hover:bg-gray-50 px-1">Account 2</button>
-                <button onclick="switchSettingsTab('portfolio')" id="set-tab-portfolio" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center border-b-2 border-transparent text-gray-500 hover:bg-gray-50 px-1">Portfolio</button>
-                <button onclick="switchSettingsTab('common')" id="set-tab-common" class="flex-1 min-w-[50px] py-3 text-xs font-bold text-center border-b-2 border-transparent text-gray-500 hover:bg-gray-50 px-1">共通</button>
+            <!-- 設定内のタブ切り替え -->
+            <div class="flex border-b bg-white overflow-x-auto scrollbar-hide items-end px-1 pt-2 gap-1">
+                <button onclick="switchSettingsTab('account1')" id="set-tab-account1" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center rounded-t-lg transition-all">Account 1</button>
+                <button onclick="switchSettingsTab('account2')" id="set-tab-account2" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center rounded-t-lg transition-all">Account 2</button>
+                <button onclick="switchSettingsTab('portfolio')" id="set-tab-portfolio" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center rounded-t-lg transition-all">Portfolio</button>
+                <button onclick="switchSettingsTab('common')" id="set-tab-common" class="flex-1 min-w-[50px] py-3 text-xs font-bold text-center rounded-t-lg transition-all bg-gray-200 text-gray-600">共通</button>
             </div>
             <div class="flex-1 overflow-y-auto p-4 bg-gray-50" id="settings-content-wrapper">
                 <!-- コンテンツはJSで注入 -->
@@ -176,9 +249,19 @@
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
             <button onclick="closeAddToHomeGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
             <div class="text-center mb-6"><i class="fa-solid fa-share-nodes text-4xl text-indigo-500 mb-3"></i><h3 class="text-lg font-bold text-gray-800">ホーム画面に追加</h3><p class="text-xs text-gray-500 mt-1">アイコン付きでアプリとして使えます</p></div>
-            <div class="space-y-6 text-sm text-gray-600">
-                <div><h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-apple text-lg mr-2"></i> iPhone (Safari)</h4><ol class="list-decimal list-inside space-y-1 pl-1"><li>画面下の共有ボタン <i class="fa-solid fa-arrow-up-from-bracket mx-1"></i> をタップ</li><li>メニューから「ホーム画面に追加」を選択</li><li>右上の「追加」をタップ</li></ol></div>
-                <div><h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-android text-lg mr-2 text-green-600"></i> Android (Chrome)</h4><ol class="list-decimal list-inside space-y-1 pl-1"><li>右上のメニュー <i class="fa-solid fa-ellipsis-vertical mx-1"></i> をタップ</li><li>「ホーム画面に追加」または「アプリをインストール」を選択</li></ol></div>
+            <div class="space-y-4 text-sm text-gray-600">
+                <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100">
+                    <p class="text-xs text-yellow-800 font-bold mb-2"><i class="fa-solid fa-circle-exclamation mr-1"></i> アプリモードで開いている場合</p>
+                    <p class="text-xs mb-3">この画面には共有ボタンがありません。<br>以下の手順でブラウザを開いてください。</p>
+                    <div class="flex items-center gap-2 mb-2"><input type="text" id="copy-pwa-url-input" class="w-full bg-white border border-gray-300 text-xs p-2 rounded text-gray-600" readonly><button onclick="copyPwaUrl()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-indigo-700 whitespace-nowrap">コピー</button></div>
+                    <p id="copy-pwa-msg" class="text-[10px] text-green-600 h-4 hidden text-center mb-2">コピーしました！</p>
+                    <ol class="list-decimal list-inside space-y-1 pl-1 text-xs"><li><strong>Safari/Chrome</strong>アプリを自分で開く</li><li>アドレスバーにURLを貼り付けて開く</li><li>その画面で「共有」→「ホーム画面に追加」</li></ol>
+                </div>
+                <div class="border-t pt-4">
+                    <h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-apple text-lg mr-2"></i> iPhone (Safari)</h4>
+                    <p class="text-xs text-gray-500">ブラウザで開いている場合:</p>
+                    <ol class="list-decimal list-inside space-y-1 pl-1 text-xs"><li>画面下の共有ボタン <i class="fa-solid fa-arrow-up-from-bracket mx-1"></i> をタップ</li><li>メニューから「ホーム画面に追加」を選択</li></ol>
+                </div>
             </div>
             <div class="mt-6 text-center"><button onclick="closeAddToHomeGuide()" class="bg-gray-100 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200">閉じる</button></div>
         </div>
@@ -213,11 +296,10 @@
 
     <script>
         const STORAGE_KEY = 'chiikuji_meishi_release_v2';
+        const TUTORIAL_KEY = 'chiikuji_meishi_tutorial_done_v1';
         const DEFAULT_ICON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=";
         
-        // アカウント用キー
         const accountPlatformKeys = ['youtube1', 'youtube2', 'instagram', 'x', 'tiktok', 'facebook', 'homepage', 'blog'];
-        // ポートフォリオ用キー
         const portfolioKeys = ['pf_home1', 'pf_home2', 'pf_home3'];
 
         const platformConfig = {
@@ -245,7 +327,9 @@
 
         let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0, currentFocusKey = null;
         let mainTouchStartX = 0, mainTouchStartY = 0;
+        let tutorialCurrentStep = 1;
 
+        // DOM Elements
         const focusContainer = document.getElementById('focus-view-container');
         const focusCardEl = document.getElementById('focus-card');
         const focusNameEl = document.getElementById('focus-name');
@@ -259,20 +343,66 @@
         const emptyState = document.getElementById('empty-state');
         const settingsContent = document.getElementById('settings-content-wrapper');
         const body = document.getElementById('app-body');
+        const appHeader = document.getElementById('app-header');
+        const appTitle = document.getElementById('app-title');
+        const headerSettingsBtn = document.getElementById('header-settings-btn');
+        
         const pwaGuideModal = document.getElementById('pwa-guide-modal');
         const bookmarkGuideModal = document.getElementById('bookmark-guide-modal');
+        const tutorialModal = document.getElementById('tutorial-modal');
 
         window.addEventListener('load', () => {
             loadData();
-            if (sessionStorage.getItem('open_pwa_guide_after_reload')) {
+            if (!localStorage.getItem(TUTORIAL_KEY)) {
+                setTimeout(() => { tutorialModal.classList.remove('hidden'); }, 500);
+            } else if (sessionStorage.getItem('open_pwa_guide_after_reload')) {
                 sessionStorage.removeItem('open_pwa_guide_after_reload');
                 setTimeout(() => { showAddToHomeGuide(); }, 500);
             }
+            
             document.addEventListener('touchstart', handleMainTouchStart, {passive: false});
             document.addEventListener('touchend', handleMainTouchEnd);
             focusContainer.addEventListener('touchstart', handleTouchStart, {passive: true});
             focusContainer.addEventListener('touchend', handleTouchEnd);
         });
+
+        // --- Tutorial Logic ---
+        function nextTutorialStep() {
+            const currentStepEl = document.querySelector(`.tutorial-step[data-step="${tutorialCurrentStep}"]`);
+            currentStepEl.classList.add('hidden');
+            document.getElementById(`dot-${tutorialCurrentStep}`).classList.replace('bg-indigo-600', 'bg-gray-300');
+            tutorialCurrentStep++;
+            const nextStepEl = document.querySelector(`.tutorial-step[data-step="${tutorialCurrentStep}"]`);
+            if (nextStepEl) {
+                nextStepEl.classList.remove('hidden');
+                document.getElementById(`dot-${tutorialCurrentStep}`).classList.replace('bg-gray-300', 'bg-indigo-600');
+                if (tutorialCurrentStep === 3) {
+                    document.getElementById('tutorial-next-btn').classList.add('hidden');
+                    document.getElementById('tutorial-close-btn').classList.remove('hidden');
+                }
+            } else {
+                closeTutorial();
+            }
+        }
+
+        function closeTutorial() {
+            const dontShow = document.getElementById('tutorial-dont-show').checked;
+            if (dontShow) localStorage.setItem(TUTORIAL_KEY, 'true');
+            tutorialModal.classList.add('hidden');
+        }
+
+        function openTutorial() {
+            tutorialCurrentStep = 1;
+            document.querySelectorAll('.tutorial-step').forEach(el => el.classList.add('hidden'));
+            document.querySelector('.tutorial-step[data-step="1"]').classList.remove('hidden');
+            document.getElementById('dot-1').className = 'dot w-2 h-2 rounded-full bg-indigo-600 transition-colors';
+            document.getElementById('dot-2').className = 'dot w-2 h-2 rounded-full bg-gray-300 transition-colors';
+            document.getElementById('dot-3').className = 'dot w-2 h-2 rounded-full bg-gray-300 transition-colors';
+            document.getElementById('tutorial-next-btn').classList.remove('hidden');
+            document.getElementById('tutorial-close-btn').classList.add('hidden');
+            document.getElementById('tutorial-dont-show').checked = false;
+            tutorialModal.classList.remove('hidden');
+        }
 
         // --- Tab Logic ---
         function switchTab(tabName) {
@@ -290,9 +420,22 @@
                 const btn = document.getElementById(`tab-btn-${t}`);
                 if(!btn) return;
                 const name = appData[t]?.config?.tabName || (t.charAt(0).toUpperCase() + t.slice(1));
+                const theme = appData[t]?.config?.themeColor || '#f8f9fa';
                 btn.textContent = name;
-                const active = currentTab === t;
-                btn.className = `flex-1 py-3 text-xs sm:text-sm text-center transition truncate px-1 ${active ? 'tab-active font-bold' : 'tab-inactive text-gray-400'}`;
+                
+                // 全てのタブに色を適用し、アクティブ・非アクティブを透過度で表現
+                btn.style.backgroundColor = theme;
+                btn.style.color = isDarkColor(theme) ? 'white' : '#374151';
+                
+                if (currentTab === t) {
+                    // Active
+                    btn.style.opacity = '1';
+                    btn.style.borderBottom = '4px solid rgba(0,0,0,0.2)'; // 強調線
+                } else {
+                    // Inactive
+                    btn.style.opacity = '0.5';
+                    btn.style.borderBottom = 'none';
+                }
             });
         }
 
@@ -330,10 +473,25 @@
                 const btn = document.getElementById(`set-tab-${t}`);
                 if(!btn) return;
                 const active = currentSettingsTab === t;
-                const baseClass = "flex-1 min-w-[50px] py-3 text-xs font-bold text-center px-1 border-b-2";
-                btn.className = `${baseClass} ${active ? 'border-indigo-600 text-indigo-600 bg-indigo-50' : 'border-transparent text-gray-500 hover:bg-gray-50'}`;
                 
-                if(t !== 'common') {
+                btn.style = ""; // Reset
+                btn.className = "flex-1 min-w-[50px] py-3 text-xs font-bold text-center px-1 rounded-t-lg transition-all duration-200 border-b-4";
+
+                if(t === 'common') {
+                    btn.className += active ? " border-gray-400 bg-gray-200 text-gray-700" : " border-transparent text-gray-400 hover:bg-gray-50";
+                } else {
+                    const theme = appData[t]?.config?.themeColor || '#f8f9fa';
+                    btn.style.backgroundColor = theme;
+                    
+                    if (active) {
+                        btn.style.opacity = '1';
+                        btn.style.borderColor = 'rgba(0,0,0,0.2)';
+                        btn.style.color = isDarkColor(theme) ? 'white' : '#374151';
+                    } else {
+                        btn.style.opacity = '0.6';
+                        btn.style.borderColor = 'transparent';
+                        btn.style.color = isDarkColor(theme) ? 'rgba(255,255,255,0.8)' : 'rgba(55,65,81,0.8)';
+                    }
                     const name = appData[t]?.config?.tabName || (t.charAt(0).toUpperCase() + t.slice(1));
                     btn.textContent = name;
                 }
@@ -353,7 +511,6 @@
             listContainer.innerHTML = '';
             const keys = getCurrentKeys();
             let activeCount = 0;
-            
             keys.forEach(key => {
                 const data = appData[currentTab];
                 if(!data) return;
@@ -385,7 +542,6 @@
                     listContainer.insertAdjacentHTML('beforeend', itemHtml);
                 }
             });
-
             if (activeCount === 0) { listContainer.classList.add('hidden'); emptyState.classList.remove('hidden'); } 
             else { listContainer.classList.remove('hidden'); emptyState.classList.add('hidden'); }
         }
@@ -395,14 +551,15 @@
             settingsContent.innerHTML = `
                 <div class="space-y-6 pb-12">
                     <div class="bg-white rounded-2xl shadow-sm p-5 border border-indigo-100">
-                        <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4 border-b pb-2">ホーム画面用アイコン</h3>
-                        <div class="flex items-center space-x-4">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider">アプリ設定</h3>
+                            <button onclick="openTutorial()" class="text-xs text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-circle-question mr-1"></i>チュートリアルを見る</button>
+                        </div>
+                        <h4 class="text-xs font-bold text-gray-600 mb-2">ホーム画面用アイコン</h4>
+                        <div class="flex items-center space-x-4 mb-2">
                             <img id="common-app-icon-preview" src="${appData.common?.appIcon || DEFAULT_ICON}" class="w-16 h-16 rounded-xl border border-gray-200 object-cover">
                             <div class="flex flex-col space-y-2">
-                                <label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center">
-                                    <i class="fa-solid fa-image mr-1"></i> 画像を選択
-                                    <input type="file" accept="image/*" class="hidden" onchange="handleCommonIconUpload(this)">
-                                </label>
+                                <label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center"><i class="fa-solid fa-image mr-1"></i> 画像を選択<input type="file" accept="image/*" class="hidden" onchange="handleCommonIconUpload(this)"></label>
                                 <button onclick="clearCommonIcon()" class="text-xs text-red-400 hover:text-red-600 hidden" id="btn-clear-common-icon"><i class="fa-solid fa-trash mr-1"></i>削除</button>
                             </div>
                         </div>
@@ -498,7 +655,6 @@
             return `<button onclick="setThemeColor('${color}')" class="color-btn" style="background-color: ${color};" title="${color}"></button>`;
         }
 
-        // --- Common Icon Logic ---
         function handleCommonIconUpload(input) {
             processImage(input, 192, 0.9, (dataUrl) => {
                 document.getElementById('setting-common-icon').value = dataUrl;
@@ -516,13 +672,12 @@
             if(appData.common) appData.common.appIcon = '';
         }
 
-        // --- Utils ---
         function handleMainTouchStart(e) {
-            if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
+            if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
             mainTouchStartX = e.touches[0].clientX; mainTouchStartY = e.touches[0].clientY;
         }
         function handleMainTouchEnd(e) {
-            if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
+            if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
             const diffX = mainTouchStartX - e.changedTouches[0].clientX;
             const diffY = mainTouchStartY - e.changedTouches[0].clientY;
             if (Math.abs(diffX) > 50 && Math.abs(diffY) < 50) {
@@ -604,11 +759,18 @@
         function processImage(input, m, q, cb) { const f = input.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { const i = new Image(); i.onload = () => { const c = document.createElement('canvas'); const ctx = c.getContext('2d'); let w = i.width, h = i.height; if(w>h){if(w>m){h*=m/w;w=m}}else{if(h>m){w*=m/h;h=m}} c.width=w;c.height=h;ctx.drawImage(i,0,0,w,h); cb(c.toDataURL('image/jpeg',q)); }; i.src = e.target.result; }; r.readAsDataURL(f); }
         
         function closeSettings() { modal.classList.add('hidden'); }
-        function showAddToHomeGuide() { pwaGuideModal.classList.remove('hidden'); }
+        function showAddToHomeGuide() { 
+            document.getElementById('copy-pwa-url-input').value = window.location.href.split('#')[0];
+            pwaGuideModal.classList.remove('hidden'); 
+        }
         function closeAddToHomeGuide() { pwaGuideModal.classList.add('hidden'); }
+        
         function showBookmarkGuide() { document.getElementById('copy-url-input').value = window.location.href.split('#')[0]; bookmarkGuideModal.classList.remove('hidden'); }
         function closeBookmarkGuide() { bookmarkGuideModal.classList.add('hidden'); }
+        
         function copyCurrentUrl() { const i = document.getElementById('copy-url-input'); i.select(); document.execCommand('copy'); const m = document.getElementById('copy-message'); m.classList.remove('hidden'); setTimeout(() => m.classList.add('hidden'), 2000); }
+        function copyPwaUrl() { const i = document.getElementById('copy-pwa-url-input'); i.select(); document.execCommand('copy'); const m = document.getElementById('copy-pwa-msg'); m.classList.remove('hidden'); setTimeout(() => m.classList.add('hidden'), 2000); }
+        
         function reloadAndShowPwaGuide() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); updateAppIcons(); sessionStorage.setItem('open_pwa_guide_after_reload', 'true'); location.reload(); }
         
         function setThemeColor(c) { document.getElementById('setting-theme-color').value = c; updateColorButtons(c); }
@@ -621,7 +783,13 @@
             }); 
         }
         function rgbToHex(rgb) { if(!rgb)return ''; if(rgb.startsWith('#'))return rgb.toLowerCase(); const v = rgb.match(/\d+/g); if(!v)return rgb; return "#"+((1<<24)+(parseInt(v[0])<<16)+(parseInt(v[1])<<8)+parseInt(v[2])).toString(16).slice(1).toLowerCase(); }
-        function applyTheme(c) { body.style.backgroundColor = c; const d = isDarkColor(c); if(d){body.classList.add('text-white');body.classList.remove('text-gray-800');}else{body.classList.remove('text-white');body.classList.add('text-gray-800');} }
+        function applyTheme(c) { 
+            appHeader.style.backgroundColor = c; 
+            const d = isDarkColor(c);
+            const contentColor = d ? 'white' : '#374151';
+            appTitle.style.color = contentColor;
+            headerSettingsBtn.style.color = d ? 'rgba(255,255,255,0.8)' : 'rgba(156,163,175,1)';
+        }
         function isDarkColor(c) { const h = rgbToHex(c); if(!h)return false; const r=parseInt(h.substr(1,2),16),g=parseInt(h.substr(3,2),16),b=parseInt(h.substr(5,2),16); return ((r*299+g*587+b*114)/1000)<128; }
         
         function exportData() { if(!modal.classList.contains('hidden') && currentSettingsTab!=='common') saveTempFormData(currentSettingsTab); const s = JSON.stringify(appData); const b = new Blob([s],{type:"application/json"}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `chiikuji_meishi_v2_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }
