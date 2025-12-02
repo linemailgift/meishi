@@ -7,78 +7,44 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chiikuji Meishi">
     <title>Chiikuji Meishi</title>
-    <!-- ホーム画面用アイコン -->
-    <link rel="apple-touch-icon" id="app-icon-apple" href="">
-    <link rel="shortcut icon" id="app-icon-default" href="">
+    <link rel="apple-touch-icon" id="app-icon-apple" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=">
+    <link rel="shortcut icon" id="app-icon-default" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
-        /* 基本スタイル */
         body {
             font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
             transition: background-color 0.5s ease;
             -webkit-tap-highlight-color: transparent;
             background-color: #f8f9fa; 
             min-height: 100vh;
-            overscroll-behavior-y: none; /* バウンススクロール防止 */
+            overscroll-behavior-y: none;
         }
 
-        /* --- 拡大ビュー（静的コンテナ） --- */
+        /* --- 拡大ビュー --- */
         #focus-view-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 50;
-            background-color: #ffffff;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            /* 下部のアイコン領域を確保するためにパディングを大きく */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 50;
+            background-color: #ffffff; background-size: cover; background-position: center; background-repeat: no-repeat;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             padding: 2rem 1rem 8rem 1rem; 
             transition: opacity 0.3s ease, visibility 0.3s ease;
-            opacity: 0;
-            visibility: hidden;
+            opacity: 0; visibility: hidden;
         }
+        #focus-view-container.active { opacity: 1; visibility: visible; }
 
-        #focus-view-container.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* 名刺カード */
         .meishi-card {
-            background: rgba(255, 255, 255, 0.90);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 2rem;
-            border-radius: 24px;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            padding: 2rem; border-radius: 24px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-            width: 100%;
-            max-width: 320px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            border: 1px solid rgba(255,255,255,0.4);
-            /* アニメーション用 */
-            transform: translateY(0);
-            transition: transform 0.1s;
+            width: 100%; max-width: 320px;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            position: relative; border: 1px solid rgba(255,255,255,0.4);
+            transform: translateY(0); transition: transform 0.1s, background-color 0.3s;
         }
 
-        /* アニメーションクラス */
         .anim-slide-in-right { animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .anim-slide-in-left { animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .anim-slide-up-out { animation: slideUpOut 0.3s ease-in forwards; }
@@ -89,147 +55,62 @@
         @keyframes slideUpOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-100px); opacity: 0; } }
         @keyframes slideDownIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .qr-code-container img,
-        .qr-code-container canvas {
-            width: 180px !important;
-            height: 180px !important;
-            margin: 0 auto;
-            border-radius: 4px;
+        .qr-code-container img, .qr-code-container canvas {
+            width: 180px !important; height: 180px !important;
+            margin: 0 auto; border-radius: 4px; background-color: white; padding: 4px; 
         }
 
-        /* --- 下部ナビゲーション --- */
         .bottom-nav {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 110px; /* 高さを十分に確保 */
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* 上寄せ */
-            padding-top: 1.5rem;
-            gap: 16px;
-            z-index: 60;
-            overflow-x: auto;
-            scrollbar-width: none;
-            /* 背景グラデーションで浮き出させる */
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 110px;
+            display: flex; justify-content: center; align-items: flex-start;
+            padding-top: 1.5rem; gap: 16px; z-index: 60;
+            overflow-x: auto; scrollbar-width: none;
             background: linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 100%);
         }
         .bottom-nav::-webkit-scrollbar { display: none; }
 
         .nav-item-wrapper {
-            position: relative;
-            flex-shrink: 0;
-            cursor: pointer;
+            position: relative; flex-shrink: 0; cursor: pointer;
             transition: transform 0.2s, opacity 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: flex; flex-direction: column; align-items: center;
         }
         .nav-item-wrapper:active { transform: scale(0.9); }
-        
-        .nav-item-wrapper.active { 
-            transform: translateY(-8px) scale(1.1); 
-            z-index: 10;
-        }
+        .nav-item-wrapper.active { transform: translateY(-8px) scale(1.1); z-index: 10; }
 
         .nav-icon {
-            width: 48px; /* 少し大きく */
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255,255,255,0.9);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-            opacity: 0.7;
-            background-color: #f3f4f6;
-            transition: all 0.3s;
+            width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.9); box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            opacity: 0.7; background-color: #f3f4f6; transition: all 0.3s;
         }
-        .nav-item-wrapper.active .nav-icon {
-            border-color: #4f46e5;
-            opacity: 1;
-            box-shadow: 0 6px 12px rgba(79, 70, 229, 0.4);
-        }
+        .nav-item-wrapper.active .nav-icon { border-color: #4f46e5; opacity: 1; box-shadow: 0 6px 12px rgba(79, 70, 229, 0.4); }
 
         .platform-badge {
-            position: absolute;
-            bottom: -2px;
-            right: -2px;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background-color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            border: 1px solid rgba(0,0,0,0.1);
-            z-index: 10;
+            position: absolute; bottom: -2px; right: -2px; width: 18px; height: 18px;
+            border-radius: 50%; background-color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); z-index: 10;
         }
 
-        /* --- リスト表示 --- */
-        .list-item {
-            transition: transform 0.2s, box-shadow 0.2s;
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(4px);
-        }
+        .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 700; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #9ca3af; font-weight: 500; }
+
+        .list-item { transition: transform 0.2s, box-shadow 0.2s; backdrop-filter: blur(4px); }
         .list-item:active { transform: scale(0.98); }
         .hidden-card { display: none !important; }
         
-        .list-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
+        .list-icon { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .focus-icon { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .img-preview { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb; background-color: #fff; }
 
-        /* 名刺フォーカス時のアイコン */
-        .focus-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid white;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        /* 画像プレビュー */
-        .img-preview {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #e5e7eb;
-            background-color: #fff;
-        }
-
-        /* タブ */
-        .tab-active {
-            border-bottom: 3px solid #4f46e5;
-            color: #4f46e5;
-            font-weight: 700;
-        }
-        .tab-inactive {
-            border-bottom: 3px solid transparent;
-            color: #9ca3af;
-            font-weight: 500;
-        }
-
-        /* カラーボタン */
-        .color-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid #e5e7eb;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
+        .color-btn { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #e5e7eb; cursor: pointer; transition: transform 0.2s; }
         .color-btn:hover { transform: scale(1.1); }
         .color-btn.selected { border-color: #4f46e5; transform: scale(1.1); box-shadow: 0 0 0 2px #c7d2fe; }
 
-        /* ブランドカラーCSSクラス */
+        .text-content-white { color: white !important; }
+        .text-content-white .text-gray-500 { color: rgba(255,255,255,0.7) !important; }
+        .text-content-white .text-gray-800 { color: white !important; }
+        .text-content-white .text-gray-400 { color: rgba(255,255,255,0.6) !important; }
+
         .text-red-600 { color: #dc2626; }
         .text-pink-600 { color: #db2777; }
         .text-blue-600 { color: #2563eb; }
@@ -238,133 +119,25 @@
         .text-white { color: #ffffff; }
         .bg-black { background-color: #000000; }
         .bg-white { background-color: #ffffff; }
+        .text-indigo-500 { color: #6366f1; }
 
     </style>
 </head>
 <body id="app-body" class="pb-20">
 
-    <!-- ヘッダー -->
     <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30 pt-3 pb-0">
         <div class="max-w-md mx-auto px-4 flex justify-between items-center mb-3">
-            <h1 class="text-xs text-gray-400 font-light tracking-widest uppercase">
-                Chiikuji Meishi
-            </h1>
-            <button onclick="openSettings()" class="text-gray-400 hover:text-gray-600 p-2">
-                <i class="fa-solid fa-gear text-lg"></i>
-            </button>
+            <h1 class="text-xs text-gray-400 font-light tracking-widest uppercase">Chiikuji Meishi</h1>
+            <button onclick="openSettings()" id="header-settings-btn" class="text-gray-400 hover:text-gray-600 p-2"><i class="fa-solid fa-gear text-lg"></i></button>
         </div>
-
-        <!-- アカウント切り替えタブ -->
-        <div class="flex max-w-md mx-auto w-full px-4">
-            <button onclick="switchTab('account1')" id="tab-btn-account1" class="flex-1 py-3 text-sm text-center transition tab-active truncate px-2">
-                Account 1
-            </button>
-            <button onclick="switchTab('account2')" id="tab-btn-account2" class="flex-1 py-3 text-sm text-center transition tab-inactive truncate px-2">
-                Account 2
-            </button>
+        <div class="flex max-w-md mx-auto w-full px-2">
+            <button onclick="switchTab('account1')" id="tab-btn-account1" class="flex-1 py-3 text-xs sm:text-sm text-center transition tab-active truncate px-1">Account 1</button>
+            <button onclick="switchTab('account2')" id="tab-btn-account2" class="flex-1 py-3 text-xs sm:text-sm text-center transition tab-inactive truncate px-1">Account 2</button>
+            <button onclick="switchTab('portfolio')" id="tab-btn-portfolio" class="flex-1 py-3 text-xs sm:text-sm text-center transition tab-inactive truncate px-1 font-bold text-gray-500">Portfolio</button>
         </div>
     </header>
 
-    <!-- 設定モーダル -->
-    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md h-[90vh] flex flex-col">
-            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
-                <h2 class="font-bold text-gray-700">設定</h2>
-                <button onclick="closeSettings()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fa-solid fa-times text-xl"></i>
-                </button>
-            </div>
-            <div class="flex border-b bg-white">
-                <button onclick="switchSettingsTab('account1')" id="set-tab-account1" class="flex-1 py-3 text-xs font-bold text-center border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50 truncate px-1">Account 1</button>
-                <button onclick="switchSettingsTab('account2')" id="set-tab-account2" class="flex-1 py-3 text-xs font-bold text-center border-b-2 border-transparent text-gray-500 hover:bg-gray-50 truncate px-1">Account 2</button>
-            </div>
-            <div class="flex-1 overflow-y-auto p-4 bg-gray-50">
-                <div class="bg-white p-5 rounded-xl shadow-sm mb-6 border border-indigo-100">
-                    <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4 border-b pb-2">基本設定</h3>
-                    <div class="mb-5">
-                        <label class="block text-xs font-bold text-gray-600 mb-1">タブの名称</label>
-                        <input type="text" id="setting-tab-name" placeholder="例: 本垢, 趣味垢" class="w-full text-sm p-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition">
-                    </div>
-                    <div class="mb-5">
-                        <label class="block text-xs font-bold text-gray-600 mb-2">アプリ全体のテーマカラー</label>
-                        <div class="flex flex-wrap gap-3 mb-2">
-                            <button onclick="setThemeColor('#f8f9fa')" class="color-btn selected" style="background-color: #f8f9fa;" title="デフォルト"></button>
-                            <button onclick="setThemeColor('#e0f2fe')" class="color-btn" style="background-color: #e0f2fe;" title="パステルブルー"></button>
-                            <button onclick="setThemeColor('#fce7f3')" class="color-btn" style="background-color: #fce7f3;" title="パステルピンク"></button>
-                            <button onclick="setThemeColor('#ecfccb')" class="color-btn" style="background-color: #ecfccb;" title="パステルライム"></button>
-                            <button onclick="setThemeColor('#1f2937')" class="color-btn" style="background-color: #1f2937;" title="ダーク"></button>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <input type="color" id="custom-theme-color" onchange="setThemeColor(this.value)" class="h-8 w-12 p-0 border rounded cursor-pointer">
-                            <span class="text-xs text-gray-500">カスタム色</span>
-                        </div>
-                        <input type="hidden" id="setting-theme-color" value="#f8f9fa">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-2">名刺拡大時の背景画像</label>
-                        <div class="flex items-center space-x-3">
-                            <div id="bg-preview-container" class="w-16 h-16 rounded-lg bg-gray-200 bg-cover bg-center border border-gray-300 relative overflow-hidden">
-                                <div id="bg-no-image" class="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">なし</div>
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center">
-                                    <i class="fa-solid fa-image mr-1"></i> 画像を選択
-                                    <input type="file" accept="image/*" class="hidden" onchange="handleBgUpload(this)">
-                                </label>
-                                <button type="button" onclick="clearBg()" id="btn-clear-bg" class="text-xs text-red-400 hover:text-red-600 hidden text-left px-1"><i class="fa-solid fa-trash mr-1"></i>削除</button>
-                            </div>
-                        </div>
-                        <input type="hidden" id="setting-bg-data">
-                    </div>
-                </div>
-                <div class="flex items-center justify-between mb-4 mt-6 px-1">
-                    <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">リンク設定・QR色変更</p>
-                </div>
-                <div id="settings-forms-container"></div>
-                <div class="mt-8 mb-4 text-center">
-                    <button onclick="showAddToHomeGuide()" class="text-xs text-gray-500 hover:text-indigo-600 underline"><i class="fa-solid fa-mobile-screen-button mr-1"></i>ホーム画面にアイコンを追加するには</button>
-                </div>
-                <div class="mt-8 pt-6 border-t border-gray-200">
-                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 text-center">データ管理（バックアップ）</h3>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="exportData()" class="bg-gray-100 text-gray-600 text-xs font-bold py-3 rounded-lg hover:bg-gray-200 flex flex-col items-center justify-center space-y-1"><i class="fa-solid fa-file-export text-lg"></i><span>ファイルに書き出し</span></button>
-                        <label class="cursor-pointer bg-gray-100 text-gray-600 text-xs font-bold py-3 rounded-lg hover:bg-gray-200 flex flex-col items-center justify-center space-y-1"><i class="fa-solid fa-file-import text-lg"></i><span>ファイルから読み込み</span><input type="file" accept=".json" class="hidden" onchange="importData(this)"></label>
-                    </div>
-                    <p class="text-[10px] text-gray-400 mt-2 text-center">※ 機種変更時などは、書き出したファイルを新しい端末で読み込んでください。</p>
-                </div>
-                <div class="mt-8 pt-6 border-t border-gray-200 text-center">
-                    <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4">このアプリをシェアする</h3>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 inline-block">
-                        <div id="share-app-qr" class="qr-code-container"></div>
-                    </div>
-                    <p class="text-[10px] text-gray-400 mt-3 px-4">このQRコードを読み取ると、<br>現在開いているアプリのページを開けます。</p>
-                    <div class="mt-2 text-[10px] text-gray-300 break-all px-4" id="current-url-display"></div>
-                </div>
-                <div class="h-8"></div>
-            </div>
-            <div class="p-4 border-t bg-white rounded-b-2xl shadow-inner z-10">
-                <button onclick="saveAndRegenerate()" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-indigo-700 transform active:scale-95 transition flex justify-center items-center"><i class="fa-solid fa-check mr-2"></i> 保存して更新</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="pwa-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeAddToHomeGuide()">
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
-            <button onclick="closeAddToHomeGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
-            <div class="text-center mb-6">
-                <i class="fa-solid fa-share-nodes text-4xl text-indigo-500 mb-3"></i>
-                <h3 class="text-lg font-bold text-gray-800">ホーム画面に追加</h3>
-            </div>
-            <div class="space-y-6 text-sm text-gray-600">
-                <div><h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-apple text-lg mr-2"></i> iPhone</h4><ol class="list-decimal list-inside space-y-1 pl-1"><li>共有ボタン <i class="fa-solid fa-arrow-up-from-bracket mx-1"></i> をタップ</li><li>「ホーム画面に追加」を選択</li></ol></div>
-                <div><h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-android text-lg mr-2 text-green-600"></i> Android</h4><ol class="list-decimal list-inside space-y-1 pl-1"><li>メニュー <i class="fa-solid fa-ellipsis-vertical mx-1"></i> をタップ</li><li>「ホーム画面に追加」を選択</li></ol></div>
-            </div>
-            <div class="mt-6 text-center"><button onclick="closeAddToHomeGuide()" class="bg-gray-100 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200">閉じる</button></div>
-        </div>
-    </div>
-
-    <!-- メインコンテンツエリア -->
-    <main class="max-w-md mx-auto p-4 pt-6">
+    <main class="max-w-md mx-auto p-4 pt-6 min-h-[70vh]">
         <div id="empty-state" class="hidden text-center py-10">
             <div class="bg-white/80 backdrop-blur rounded-xl p-8 shadow-sm border border-white/50">
                 <i class="fa-solid fa-qrcode text-5xl text-gray-300 mb-4"></i>
@@ -375,32 +148,77 @@
         <div id="qr-list" class="space-y-3 pb-8"></div>
     </main>
 
-    <!-- フォーカスビューのオーバーレイ（静的構造） -->
-    <div id="focus-view-container" onclick="closeFocus()">
-        <div id="focus-card" class="meishi-card" onclick="event.stopPropagation()">
-            <div id="focus-icon-container" class="mb-4">
-                <!-- Icon injected here -->
+    <!-- 設定モーダル -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <h2 class="font-bold text-gray-700">設定</h2>
+                <button onclick="closeSettings()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
-            <h2 id="focus-name" class="text-lg font-bold text-gray-800 mb-2 leading-tight line-clamp-2"></h2>
-            <div id="focus-label-container" class="flex items-center justify-center text-gray-500 mb-6 text-xs font-bold uppercase tracking-widest">
-                <!-- Label injected here -->
+            <!-- 設定内のタブ切り替え (4つ) -->
+            <div class="flex border-b bg-white overflow-x-auto scrollbar-hide">
+                <button onclick="switchSettingsTab('account1')" id="set-tab-account1" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50 px-1">Account 1</button>
+                <button onclick="switchSettingsTab('account2')" id="set-tab-account2" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center border-b-2 border-transparent text-gray-500 hover:bg-gray-50 px-1">Account 2</button>
+                <button onclick="switchSettingsTab('portfolio')" id="set-tab-portfolio" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center border-b-2 border-transparent text-gray-500 hover:bg-gray-50 px-1">Portfolio</button>
+                <button onclick="switchSettingsTab('common')" id="set-tab-common" class="flex-1 min-w-[50px] py-3 text-xs font-bold text-center border-b-2 border-transparent text-gray-500 hover:bg-gray-50 px-1">共通</button>
             </div>
-            <div id="focus-qr-target" class="qr-code-container bg-white p-2 rounded-xl shadow-inner border border-gray-100 mb-6"></div>
-            <button onclick="closeFocus()" class="mt-2 text-gray-400 text-sm hover:text-gray-600">
-                <i class="fa-solid fa-xmark mr-1"></i> 閉じる (上スワイプ)
-            </button>
-        </div>
-        <div id="focus-bottom-nav" class="bottom-nav" onclick="event.stopPropagation()">
-            <!-- Nav items injected here -->
+            <div class="flex-1 overflow-y-auto p-4 bg-gray-50" id="settings-content-wrapper">
+                <!-- コンテンツはJSで注入 -->
+            </div>
+            <div class="p-4 border-t bg-white rounded-b-2xl shadow-inner z-10">
+                <button onclick="saveAndRegenerate()" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-indigo-700 transform active:scale-95 transition flex justify-center items-center"><i class="fa-solid fa-check mr-2"></i> 保存して更新</button>
+            </div>
         </div>
     </div>
 
+    <!-- ホーム画面追加ガイドモーダル -->
+    <div id="pwa-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeAddToHomeGuide()">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
+            <button onclick="closeAddToHomeGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
+            <div class="text-center mb-6"><i class="fa-solid fa-share-nodes text-4xl text-indigo-500 mb-3"></i><h3 class="text-lg font-bold text-gray-800">ホーム画面に追加</h3><p class="text-xs text-gray-500 mt-1">アイコン付きでアプリとして使えます</p></div>
+            <div class="space-y-6 text-sm text-gray-600">
+                <div><h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-apple text-lg mr-2"></i> iPhone (Safari)</h4><ol class="list-decimal list-inside space-y-1 pl-1"><li>画面下の共有ボタン <i class="fa-solid fa-arrow-up-from-bracket mx-1"></i> をタップ</li><li>メニューから「ホーム画面に追加」を選択</li><li>右上の「追加」をタップ</li></ol></div>
+                <div><h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-android text-lg mr-2 text-green-600"></i> Android (Chrome)</h4><ol class="list-decimal list-inside space-y-1 pl-1"><li>右上のメニュー <i class="fa-solid fa-ellipsis-vertical mx-1"></i> をタップ</li><li>「ホーム画面に追加」または「アプリをインストール」を選択</li></ol></div>
+            </div>
+            <div class="mt-6 text-center"><button onclick="closeAddToHomeGuide()" class="bg-gray-100 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200">閉じる</button></div>
+        </div>
+    </div>
+
+    <!-- ブックマークガイド -->
+    <div id="bookmark-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeBookmarkGuide()">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
+            <button onclick="closeBookmarkGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
+            <div class="text-center mb-4"><i class="fa-solid fa-bookmark text-4xl text-yellow-500 mb-2"></i><h3 class="text-lg font-bold text-gray-800">ブラウザで開く・登録</h3></div>
+            <div class="bg-gray-50 p-3 rounded-lg mb-4 border border-gray-200">
+                <p class="text-xs text-gray-500 mb-1">現在のURL:</p>
+                <div class="flex items-center gap-2"><input type="text" id="copy-url-input" class="w-full bg-white border border-gray-300 text-xs p-2 rounded text-gray-600" readonly><button onclick="copyCurrentUrl()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-indigo-700 whitespace-nowrap">コピー</button></div>
+                <p id="copy-message" class="text-[10px] text-green-600 mt-1 h-4 hidden text-center">URLをコピーしました！</p>
+            </div>
+            <div class="space-y-4 text-sm text-gray-600"><p class="text-xs bg-yellow-50 p-2 rounded text-yellow-800 border border-yellow-100"><i class="fa-solid fa-circle-info mr-1"></i>アプリモードでは直接ブラウザを開けません。<br><strong>URLをコピーして、SafariやChromeのアドレスバーに貼り付けて開いてください。</strong></p></div>
+            <div class="mt-6 text-center"><button onclick="closeBookmarkGuide()" class="bg-gray-100 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200">閉じる</button></div>
+        </div>
+    </div>
+
+    <!-- フォーカスビュー -->
+    <div id="focus-view-container" onclick="closeFocus()">
+        <div id="focus-card" class="meishi-card" onclick="event.stopPropagation()">
+            <div id="focus-icon-container" class="mb-4"></div>
+            <h2 id="focus-name" class="text-lg font-bold text-gray-800 mb-2 leading-tight line-clamp-2"></h2>
+            <div id="focus-label-container" class="flex items-center justify-center text-gray-500 mb-6 text-xs font-bold uppercase tracking-widest"></div>
+            <div id="focus-qr-target" class="qr-code-container bg-white p-2 rounded-xl shadow-inner border border-gray-100 mb-6"></div>
+            <button onclick="closeFocus()" class="mt-2 text-gray-400 text-sm hover:text-gray-600"><i class="fa-solid fa-xmark mr-1"></i> 閉じる (上スワイプ)</button>
+        </div>
+        <div id="focus-bottom-nav" class="bottom-nav" onclick="event.stopPropagation()"></div>
+    </div>
+
     <script>
-        const STORAGE_KEY = 'chiikuji_meishi_release_v1';
+        const STORAGE_KEY = 'chiikuji_meishi_release_v2';
+        const DEFAULT_ICON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=";
         
-        const platformKeys = [
-            'youtube1', 'youtube2', 'instagram', 'x', 'tiktok', 'facebook', 'homepage', 'blog'
-        ];
+        // アカウント用キー
+        const accountPlatformKeys = ['youtube1', 'youtube2', 'instagram', 'x', 'tiktok', 'facebook', 'homepage', 'blog'];
+        // ポートフォリオ用キー
+        const portfolioKeys = ['pf_home1', 'pf_home2', 'pf_home3'];
 
         const platformConfig = {
             'youtube1': { label: 'YouTube (Main)', icon: 'fa-brands fa-youtube', color: 'text-red-600', badgeClass: 'text-red-600', badgeBg: 'bg-white', defaultQrColor: '#CD201F' },
@@ -410,23 +228,24 @@
             'x': { label: 'X (Twitter)', icon: 'fa-brands fa-x-twitter', color: 'text-black', badgeClass: 'text-white', badgeBg: 'bg-black', defaultQrColor: '#333333' },
             'facebook': { label: 'Facebook', icon: 'fa-brands fa-facebook', color: 'text-blue-600', badgeClass: 'text-blue-600', badgeBg: 'bg-white', defaultQrColor: '#1877F2' },
             'homepage': { label: 'Homepage', icon: 'fa-solid fa-house', color: 'text-indigo-600', badgeClass: 'text-indigo-600', badgeBg: 'bg-white', defaultQrColor: '#4F46E5' },
-            'blog': { label: 'Blog', icon: 'fa-solid fa-pen-nib', color: 'text-gray-600', badgeClass: 'text-gray-600', badgeBg: 'bg-white', defaultQrColor: '#4B5563' }
+            'blog': { label: 'Blog', icon: 'fa-solid fa-pen-nib', color: 'text-gray-600', badgeClass: 'text-gray-600', badgeBg: 'bg-white', defaultQrColor: '#4B5563' },
+            'pf_home1': { label: 'Homepage 1', icon: 'fa-solid fa-globe', color: 'text-indigo-500', badgeClass: 'text-indigo-500', badgeBg: 'bg-white', defaultQrColor: '#6366F1' },
+            'pf_home2': { label: 'Homepage 2', icon: 'fa-solid fa-globe', color: 'text-indigo-500', badgeClass: 'text-indigo-500', badgeBg: 'bg-white', defaultQrColor: '#6366F1' },
+            'pf_home3': { label: 'Homepage 3', icon: 'fa-solid fa-globe', color: 'text-indigo-500', badgeClass: 'text-indigo-500', badgeBg: 'bg-white', defaultQrColor: '#6366F1' }
         };
 
         let currentTab = 'account1'; 
         let currentSettingsTab = 'account1';
-        let appData = {
-            account1: { config: { tabName: 'Account 1', bgImage: '', themeColor: '#f8f9fa' } },
-            account2: { config: { tabName: 'Account 2', bgImage: '', themeColor: '#f8f9fa' } }
+        let appData = { 
+            account1: { config: { tabName: 'Account 1', bgImage: '', themeColor: '#f8f9fa' } }, 
+            account2: { config: { tabName: 'Account 2', bgImage: '', themeColor: '#f8f9fa' } },
+            portfolio: { config: { tabName: 'Portfolio', bgImage: '', themeColor: '#f8f9fa' } },
+            common: { appIcon: '' }
         };
 
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-        let currentFocusKey = null;
+        let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0, currentFocusKey = null;
+        let mainTouchStartX = 0, mainTouchStartY = 0;
 
-        // DOM Elements
         const focusContainer = document.getElementById('focus-view-container');
         const focusCardEl = document.getElementById('focus-card');
         const focusNameEl = document.getElementById('focus-name');
@@ -434,342 +253,453 @@
         const focusLabelContainer = document.getElementById('focus-label-container');
         const focusQrTarget = document.getElementById('focus-qr-target');
         const focusBottomNav = document.getElementById('focus-bottom-nav');
-
+        
         const modal = document.getElementById('settings-modal');
         const listContainer = document.getElementById('qr-list');
         const emptyState = document.getElementById('empty-state');
-        const settingsContainer = document.getElementById('settings-forms-container');
+        const settingsContent = document.getElementById('settings-content-wrapper');
         const body = document.getElementById('app-body');
-        const guideModal = document.getElementById('pwa-guide-modal');
+        const pwaGuideModal = document.getElementById('pwa-guide-modal');
+        const bookmarkGuideModal = document.getElementById('bookmark-guide-modal');
 
         window.addEventListener('load', () => {
             loadData();
-            // Touch event listeners for the focus view
+            if (sessionStorage.getItem('open_pwa_guide_after_reload')) {
+                sessionStorage.removeItem('open_pwa_guide_after_reload');
+                setTimeout(() => { showAddToHomeGuide(); }, 500);
+            }
+            document.addEventListener('touchstart', handleMainTouchStart, {passive: false});
+            document.addEventListener('touchend', handleMainTouchEnd);
             focusContainer.addEventListener('touchstart', handleTouchStart, {passive: true});
             focusContainer.addEventListener('touchend', handleTouchEnd);
         });
 
-        // --- Logic ---
+        // --- Tab Logic ---
+        function switchTab(tabName) {
+            currentTab = tabName;
+            window.scrollTo(0, 0);
+            updateTabUI();
+            renderList();
+            const theme = appData[currentTab]?.config?.themeColor || '#f8f9fa';
+            applyTheme(theme);
+        }
 
-        function initializeList() {
+        function updateTabUI() {
+            const tabs = ['account1', 'account2', 'portfolio'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if(!btn) return;
+                const name = appData[t]?.config?.tabName || (t.charAt(0).toUpperCase() + t.slice(1));
+                btn.textContent = name;
+                const active = currentTab === t;
+                btn.className = `flex-1 py-3 text-xs sm:text-sm text-center transition truncate px-1 ${active ? 'tab-active font-bold' : 'tab-inactive text-gray-400'}`;
+            });
+        }
+
+        function cycleTab(direction) {
+            const tabs = ['account1', 'account2', 'portfolio'];
+            let idx = tabs.indexOf(currentTab);
+            if(idx === -1) return;
+            if (direction === 'next') idx = (idx + 1) % tabs.length;
+            else idx = (idx - 1 + tabs.length) % tabs.length;
+            switchTab(tabs[idx]);
+        }
+
+        function getCurrentKeys() {
+            return currentTab === 'portfolio' ? portfolioKeys : accountPlatformKeys;
+        }
+
+        // --- Settings Logic ---
+        function switchSettingsTab(tabName) {
+            if (!modal.classList.contains('hidden') && currentSettingsTab !== 'common') {
+                saveTempFormData(currentSettingsTab);
+            }
+            currentSettingsTab = tabName;
+            updateSettingsTabUI();
+            
+            if(tabName === 'common') {
+                renderCommonSettings();
+            } else {
+                renderSettingsForm(tabName);
+            }
+        }
+
+        function updateSettingsTabUI() {
+            const tabs = ['account1', 'account2', 'portfolio', 'common'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`set-tab-${t}`);
+                if(!btn) return;
+                const active = currentSettingsTab === t;
+                const baseClass = "flex-1 min-w-[50px] py-3 text-xs font-bold text-center px-1 border-b-2";
+                btn.className = `${baseClass} ${active ? 'border-indigo-600 text-indigo-600 bg-indigo-50' : 'border-transparent text-gray-500 hover:bg-gray-50'}`;
+                
+                if(t !== 'common') {
+                    const name = appData[t]?.config?.tabName || (t.charAt(0).toUpperCase() + t.slice(1));
+                    btn.textContent = name;
+                }
+            });
+        }
+
+        function openSettings() {
+            currentSettingsTab = (currentTab === 'common') ? 'account1' : currentTab;
+            updateSettingsTabUI();
+            if(currentSettingsTab === 'common') renderCommonSettings();
+            else renderSettingsForm(currentSettingsTab);
+            modal.classList.remove('hidden');
+        }
+
+        // --- Render Functions ---
+        function renderList() {
             listContainer.innerHTML = '';
-            platformKeys.forEach(key => {
-                const config = platformConfig[key];
-                const itemHtml = `
-                    <div id="card-${key}" class="list-item rounded-2xl shadow-sm p-4 flex items-center space-x-4 cursor-pointer border border-white/50 hidden-card" onclick="focusCard('${key}')">
-                        <div class="relative flex-shrink-0">
-                            <img id="icon-${key}" src="" class="list-icon hidden bg-gray-50">
-                            <div id="no-icon-${key}" class="list-icon hidden bg-gray-50 flex items-center justify-center text-gray-300 text-2xl"><i class="fa-solid fa-user"></i></div>
-                            <div class="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm border border-gray-100 z-10">
-                                <i class="${config.icon} ${config.color} text-sm w-4 h-4 flex items-center justify-center"></i>
+            const keys = getCurrentKeys();
+            let activeCount = 0;
+            
+            keys.forEach(key => {
+                const data = appData[currentTab];
+                if(!data) return;
+                const item = data[key] || {};
+                const url = item.url;
+                if (url) {
+                    activeCount++;
+                    const config = platformConfig[key];
+                    const cardColor = item.cardBgColor || '#ffffff';
+                    const textColorClass = isDarkColor(cardColor) ? 'text-content-white' : '';
+                    
+                    const itemHtml = `
+                        <div id="card-${key}" class="list-item rounded-2xl shadow-sm p-4 flex items-center space-x-4 cursor-pointer border border-white/50 ${textColorClass}" 
+                             style="background-color: ${cardColor};" onclick="focusCard('${key}')">
+                            <div class="relative flex-shrink-0">
+                                <img id="icon-${key}" src="${item.image || ''}" class="list-icon ${item.image ? '' : 'hidden'} bg-gray-50">
+                                <div id="no-icon-${key}" class="list-icon ${item.image ? 'hidden' : ''} bg-gray-50 flex items-center justify-center text-gray-300 text-2xl"><i class="fa-solid fa-user"></i></div>
+                                <div class="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm border border-gray-100 z-10">
+                                    <i class="${config.icon} ${config.color} text-sm w-4 h-4 flex items-center justify-center"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-[10px] font-bold opacity-60 uppercase tracking-wider mb-0.5">${config.label}</div>
+                                <div id="display-name-${key}" class="font-bold text-lg truncate">${item.name || config.label}</div>
+                            </div>
+                            <div class="opacity-50"><i class="fa-solid fa-chevron-right"></i></div>
+                        </div>
+                    `;
+                    listContainer.insertAdjacentHTML('beforeend', itemHtml);
+                }
+            });
+
+            if (activeCount === 0) { listContainer.classList.add('hidden'); emptyState.classList.remove('hidden'); } 
+            else { listContainer.classList.remove('hidden'); emptyState.classList.add('hidden'); }
+        }
+
+        // --- Common Settings Render ---
+        function renderCommonSettings() {
+            settingsContent.innerHTML = `
+                <div class="space-y-6 pb-12">
+                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-indigo-100">
+                        <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4 border-b pb-2">ホーム画面用アイコン</h3>
+                        <div class="flex items-center space-x-4">
+                            <img id="common-app-icon-preview" src="${appData.common?.appIcon || DEFAULT_ICON}" class="w-16 h-16 rounded-xl border border-gray-200 object-cover">
+                            <div class="flex flex-col space-y-2">
+                                <label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center">
+                                    <i class="fa-solid fa-image mr-1"></i> 画像を選択
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleCommonIconUpload(this)">
+                                </label>
+                                <button onclick="clearCommonIcon()" class="text-xs text-red-400 hover:text-red-600 hidden" id="btn-clear-common-icon"><i class="fa-solid fa-trash mr-1"></i>削除</button>
                             </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">${config.label}</div>
-                            <div id="display-name-${key}" class="font-bold text-gray-800 text-lg truncate"></div>
+                        <input type="hidden" id="setting-common-icon" value="${appData.common?.appIcon || ''}">
+                        <p class="text-[10px] text-gray-400 mt-2">※ ここで設定した画像が、ホーム画面に追加した時のアイコンになります。</p>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm p-6 text-center border border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4"><i class="fa-solid fa-share-nodes mr-2"></i>このアプリをシェア</h3>
+                        <div class="bg-gray-50 p-4 rounded-xl inline-block mb-4 border border-gray-200"><div id="share-app-qr" class="qr-code-container"></div></div>
+                        <p class="text-[10px] text-gray-400 mb-2">QRコードを読み取ると、現在開いているページを共有できます。</p>
+                        <div class="text-[10px] text-gray-300 break-all px-4" id="current-url-display"></div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3">
+                        <button onclick="reloadAndShowPwaGuide()" class="bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-indigo-700 flex items-center justify-center transform active:scale-95 transition"><i class="fa-solid fa-mobile-screen-button mr-2"></i> アプリをホームに追加 (更新)</button>
+                        <button onclick="showBookmarkGuide()" class="bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 flex items-center justify-center transform active:scale-95 transition"><i class="fa-regular fa-bookmark mr-2"></i> ブックマークに登録</button>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">データ管理</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="exportData()" class="bg-gray-50 text-gray-600 text-xs font-bold py-3 rounded-lg hover:bg-gray-100 flex flex-col items-center justify-center space-y-1 border border-gray-200"><i class="fa-solid fa-file-export text-lg text-gray-400"></i><span>書き出し</span></button>
+                            <label class="cursor-pointer bg-gray-50 text-gray-600 text-xs font-bold py-3 rounded-lg hover:bg-gray-100 flex flex-col items-center justify-center space-y-1 border border-gray-200"><i class="fa-solid fa-file-import text-lg text-gray-400"></i><span>読み込み</span><input type="file" accept=".json" class="hidden" onchange="importData(this)"></label>
                         </div>
-                        <div class="text-gray-400/50"><i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                </div>
+            `;
+            renderShareQR();
+            if(appData.common?.appIcon) document.getElementById('btn-clear-common-icon').classList.remove('hidden');
+        }
+
+        // --- Account/Portfolio Settings Render ---
+        function renderSettingsForm(tabName) {
+            const keys = (tabName === 'portfolio') ? portfolioKeys : accountPlatformKeys;
+            const tabConfig = appData[tabName].config || {};
+            
+            let html = `
+                <div class="bg-white p-5 rounded-xl shadow-sm mb-6 border border-indigo-100">
+                    <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4 border-b pb-2">基本設定</h3>
+                    <div class="mb-5"><label class="block text-xs font-bold text-gray-600 mb-1">タブの名称</label><input type="text" id="setting-tab-name" value="${tabConfig.tabName || ''}" placeholder="例: 本垢, Portfolio" class="w-full text-sm p-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition"></div>
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-gray-600 mb-2">アプリ全体のテーマカラー</label>
+                        <div class="flex flex-wrap gap-3 mb-2">
+                            ${renderColorBtn('#f8f9fa')}${renderColorBtn('#e0f2fe')}${renderColorBtn('#fce7f3')}${renderColorBtn('#ecfccb')}${renderColorBtn('#1f2937')}
+                        </div>
+                        <div class="flex items-center space-x-2"><input type="color" id="custom-theme-color" onchange="setThemeColor(this.value)" class="h-8 w-12 p-0 border rounded cursor-pointer"><span class="text-xs text-gray-500">カスタム色</span></div>
+                        <input type="hidden" id="setting-theme-color" value="${tabConfig.themeColor || '#f8f9fa'}">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-2">背景画像</label>
+                        <div class="flex items-center space-x-3">
+                            <div id="bg-preview-container" class="w-16 h-16 rounded-lg bg-gray-200 bg-cover bg-center border border-gray-300 relative overflow-hidden" style="${tabConfig.bgImage ? `background-image:url('${tabConfig.bgImage}')` : ''}">
+                                ${!tabConfig.bgImage ? '<div id="bg-no-image" class="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">なし</div>' : ''}
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center"><i class="fa-solid fa-image mr-1"></i> 選択<input type="file" accept="image/*" class="hidden" onchange="handleBgUpload(this)"></label>
+                                <button type="button" onclick="clearBg()" class="text-xs text-red-400 hover:text-red-600 ${!tabConfig.bgImage ? 'hidden' : ''}" id="btn-clear-bg"><i class="fa-solid fa-trash mr-1"></i>削除</button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="setting-bg-data" value="${tabConfig.bgImage || ''}">
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mb-4 mt-6 px-1"><p class="text-xs text-gray-500 font-bold uppercase tracking-wider">リンク・色設定</p></div>
+            `;
+
+            keys.forEach((key, index) => {
+                const config = platformConfig[key];
+                const currentVal = appData[tabName][key] || { url: '', name: '', image: '', qrColor: config.defaultQrColor, cardBgColor: '#FFFFFF' };
+                let copyBtnHtml = (tabName !== 'portfolio' && index > 0) ? `<button type="button" onclick="copyProfileFromMain('${tabName}', '${key}')" class="text-xs text-indigo-600 font-bold hover:bg-indigo-50 px-2 py-1 rounded transition ml-auto border border-indigo-100"><i class="fa-regular fa-copy mr-1"></i>コピー</button>` : '';
+
+                html += `
+                    <div class="bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-100 relative">
+                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-50"><label class="block text-sm font-bold text-gray-700 flex items-center"><i class="${config.icon} ${config.color} mr-2 text-lg w-6 text-center"></i> ${config.label}</label>${copyBtnHtml}</div>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="relative"><img id="preview-${tabName}-${key}" src="${currentVal.image || ''}" class="img-preview shadow-sm ${currentVal.image ? '' : 'hidden'}"><div id="no-preview-${tabName}-${key}" class="img-preview bg-gray-50 flex items-center justify-center text-gray-300 ${currentVal.image ? 'hidden' : ''}"><i class="fa-solid fa-user"></i></div></div>
+                                <div class="flex flex-col space-y-2"><label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center font-medium"><i class="fa-solid fa-camera mr-1"></i> 画像<input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(this, '${tabName}', '${key}')"></label><button type="button" onclick="clearImage('${tabName}', '${key}')" class="text-xs text-red-400 hover:text-red-600 ${currentVal.image ? '' : 'hidden'} text-left px-1" id="clear-${tabName}-${key}"><i class="fa-solid fa-trash mr-1"></i>削除</button></div>
+                                <input type="hidden" id="img-data-${tabName}-${key}" value="${currentVal.image || ''}">
+                            </div>
+                            <div><label class="block text-[10px] font-bold text-gray-400 mb-1">表示名</label><input type="text" id="name-${tabName}-${key}" value="${currentVal.name || ''}" placeholder="表示名" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition font-medium text-gray-800"></div>
+                            <div><label class="block text-[10px] font-bold text-gray-400 mb-1">リンクURL</label><input type="url" id="input-${tabName}-${key}" value="${currentVal.url || ''}" placeholder="https://..." class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition text-gray-600"></div>
+                            <div class="flex items-center space-x-4 pt-2 border-t border-gray-50">
+                                <div class="flex flex-col"><label class="text-[10px] font-bold text-gray-400 mb-1">QR色</label><div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200"><input type="color" id="qr-color-${tabName}-${key}" value="${currentVal.qrColor || config.defaultQrColor || '#000000'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0"></div></div>
+                                <div class="flex flex-col"><label class="text-[10px] font-bold text-gray-400 mb-1">背景色</label><div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200"><input type="color" id="qr-bg-${tabName}-${key}" value="${currentVal.cardBgColor || '#FFFFFF'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0"></div></div>
+                            </div>
+                        </div>
                     </div>
                 `;
-                listContainer.insertAdjacentHTML('beforeend', itemHtml);
+            });
+            settingsContent.innerHTML = html;
+            updateColorButtons(tabConfig.themeColor || '#f8f9fa');
+        }
+
+        function renderColorBtn(color) {
+            return `<button onclick="setThemeColor('${color}')" class="color-btn" style="background-color: ${color};" title="${color}"></button>`;
+        }
+
+        // --- Common Icon Logic ---
+        function handleCommonIconUpload(input) {
+            processImage(input, 192, 0.9, (dataUrl) => {
+                document.getElementById('setting-common-icon').value = dataUrl;
+                document.getElementById('common-app-icon-preview').src = dataUrl;
+                document.getElementById('btn-clear-common-icon').classList.remove('hidden');
+                if(!appData.common) appData.common = {};
+                appData.common.appIcon = dataUrl;
+            });
+        }
+        
+        function clearCommonIcon() {
+            document.getElementById('setting-common-icon').value = '';
+            document.getElementById('common-app-icon-preview').src = DEFAULT_ICON;
+            document.getElementById('btn-clear-common-icon').classList.add('hidden');
+            if(appData.common) appData.common.appIcon = '';
+        }
+
+        // --- Utils ---
+        function handleMainTouchStart(e) {
+            if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
+            mainTouchStartX = e.touches[0].clientX; mainTouchStartY = e.touches[0].clientY;
+        }
+        function handleMainTouchEnd(e) {
+            if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
+            const diffX = mainTouchStartX - e.changedTouches[0].clientX;
+            const diffY = mainTouchStartY - e.changedTouches[0].clientY;
+            if (Math.abs(diffX) > 50 && Math.abs(diffY) < 50) {
+                cycleTab(diffX > 0 ? 'next' : 'prev');
+            }
+        }
+
+        function saveTempFormData(tabName) {
+            if(tabName === 'common') return; 
+            const tabNameInput = document.getElementById('setting-tab-name');
+            if (!tabNameInput) return;
+            if (!appData[tabName]) appData[tabName] = {};
+            if (!appData[tabName].config) appData[tabName].config = {};
+            appData[tabName].config.tabName = tabNameInput.value.trim();
+            appData[tabName].config.bgImage = document.getElementById('setting-bg-data').value;
+            appData[tabName].config.themeColor = document.getElementById('setting-theme-color').value;
+            const keys = (tabName === 'portfolio') ? portfolioKeys : accountPlatformKeys;
+            keys.forEach(key => {
+                const urlInput = document.getElementById(`input-${tabName}-${key}`);
+                if (!urlInput) return;
+                appData[tabName][key] = {
+                    url: urlInput.value.trim(),
+                    name: document.getElementById(`name-${tabName}-${key}`).value.trim(),
+                    image: document.getElementById(`img-data-${tabName}-${key}`).value,
+                    qrColor: document.getElementById(`qr-color-${tabName}-${key}`).value,
+                    cardBgColor: document.getElementById(`qr-bg-${tabName}-${key}`).value
+                };
             });
         }
 
-        function focusCard(key) {
-            currentFocusKey = key;
-            updateFocusContent(key, 'in'); // 'in' is simple fade in
-            focusContainer.classList.add('active');
+        function saveAndRegenerate() {
+            if(currentSettingsTab !== 'common') saveTempFormData(currentSettingsTab);
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+                updateAppIcons();
+                closeSettings();
+                switchTab(currentTab === 'common' ? 'account1' : currentTab);
+                alert("設定を保存しました。");
+            } catch (e) { alert('データ量が大きすぎます。'); console.error(e); }
         }
 
-        // 拡大画面のコンテンツのみ更新（スムーズ化の肝）
-        function updateFocusContent(key, animType = '') {
-            const data = appData[currentTab] || {};
-            const item = data[key];
-            if (!item || !item.url) return;
+        function updateAppIcons() {
+            const icon = appData.common?.appIcon || DEFAULT_ICON;
+            document.getElementById('app-icon-apple').href = icon;
+            document.getElementById('app-icon-default').href = icon;
+        }
 
-            const config = platformConfig[key];
-            const tabConfig = data.config || {};
-            
-            // 背景画像更新（親コンテナ）
-            focusContainer.style.backgroundImage = tabConfig.bgImage ? `url('${tabConfig.bgImage}')` : '';
-
-            // アニメーション適用
-            focusCardEl.className = 'meishi-card'; // reset classes
-            void focusCardEl.offsetWidth; // trigger reflow
-            
-            if (animType === 'next') focusCardEl.classList.add('anim-slide-in-right');
-            else if (animType === 'prev') focusCardEl.classList.add('anim-slide-in-left');
-            else if (animType === 'down') focusCardEl.classList.add('anim-slide-down-in');
-            
-            // アイコン
-            if (item.image) {
-                focusIconContainer.innerHTML = `<img src="${item.image}" class="focus-icon">`;
-            } else {
-                focusIconContainer.innerHTML = `<div class="focus-icon bg-gray-50 flex items-center justify-center text-4xl text-gray-300"><i class="fa-solid fa-user"></i></div>`;
+        function loadData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    appData = JSON.parse(stored);
+                    ['account1', 'account2', 'portfolio'].forEach(t => { if(!appData[t]) appData[t] = {config:{}}; });
+                    if(!appData.common) appData.common = { appIcon: '' };
+                } catch(e) { console.error(e); }
             }
+            updateTabUI();
+            switchTab('account1');
+            updateAppIcons();
+        }
 
-            // テキスト
+        function handleImageUpload(input, tabName, key) {
+            processImage(input, 150, 0.7, (dataUrl) => {
+                document.getElementById(`img-data-${tabName}-${key}`).value = dataUrl;
+                document.getElementById(`preview-${tabName}-${key}`).src = dataUrl;
+                document.getElementById(`preview-${tabName}-${key}`).classList.remove('hidden');
+                document.getElementById(`no-preview-${tabName}-${key}`).classList.add('hidden');
+                document.getElementById(`clear-${tabName}-${key}`).classList.remove('hidden');
+            });
+        }
+        function clearImage(tabName, key) {
+            document.getElementById(`img-data-${tabName}-${key}`).value = '';
+            document.getElementById(`preview-${tabName}-${key}`).classList.add('hidden');
+            document.getElementById(`no-preview-${tabName}-${key}`).classList.remove('hidden');
+            document.getElementById(`clear-${tabName}-${key}`).classList.add('hidden');
+        }
+        function handleBgUpload(input) { processImage(input, 600, 0.6, (d) => { document.getElementById('setting-bg-data').value = d; document.getElementById('bg-preview-container').style.backgroundImage = `url('${d}')`; document.getElementById('bg-no-image').classList.add('hidden'); document.getElementById('btn-clear-bg').classList.remove('hidden'); }); }
+        function clearBg() { document.getElementById('setting-bg-data').value = ''; document.getElementById('bg-preview-container').style.backgroundImage = ''; document.getElementById('bg-no-image').classList.remove('hidden'); document.getElementById('btn-clear-bg').classList.add('hidden'); }
+        function processImage(input, m, q, cb) { const f = input.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { const i = new Image(); i.onload = () => { const c = document.createElement('canvas'); const ctx = c.getContext('2d'); let w = i.width, h = i.height; if(w>h){if(w>m){h*=m/w;w=m}}else{if(h>m){w*=m/h;h=m}} c.width=w;c.height=h;ctx.drawImage(i,0,0,w,h); cb(c.toDataURL('image/jpeg',q)); }; i.src = e.target.result; }; r.readAsDataURL(f); }
+        
+        function closeSettings() { modal.classList.add('hidden'); }
+        function showAddToHomeGuide() { pwaGuideModal.classList.remove('hidden'); }
+        function closeAddToHomeGuide() { pwaGuideModal.classList.add('hidden'); }
+        function showBookmarkGuide() { document.getElementById('copy-url-input').value = window.location.href.split('#')[0]; bookmarkGuideModal.classList.remove('hidden'); }
+        function closeBookmarkGuide() { bookmarkGuideModal.classList.add('hidden'); }
+        function copyCurrentUrl() { const i = document.getElementById('copy-url-input'); i.select(); document.execCommand('copy'); const m = document.getElementById('copy-message'); m.classList.remove('hidden'); setTimeout(() => m.classList.add('hidden'), 2000); }
+        function reloadAndShowPwaGuide() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); updateAppIcons(); sessionStorage.setItem('open_pwa_guide_after_reload', 'true'); location.reload(); }
+        
+        function setThemeColor(c) { document.getElementById('setting-theme-color').value = c; updateColorButtons(c); }
+        function updateColorButtons(c) { 
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+            const customInput = document.getElementById('custom-theme-color');
+            if(customInput) customInput.value = c;
+            document.querySelectorAll('.color-btn').forEach(b => { 
+                if(rgbToHex(b.style.backgroundColor)===c.toLowerCase() || b.style.backgroundColor===c) b.classList.add('selected'); 
+            }); 
+        }
+        function rgbToHex(rgb) { if(!rgb)return ''; if(rgb.startsWith('#'))return rgb.toLowerCase(); const v = rgb.match(/\d+/g); if(!v)return rgb; return "#"+((1<<24)+(parseInt(v[0])<<16)+(parseInt(v[1])<<8)+parseInt(v[2])).toString(16).slice(1).toLowerCase(); }
+        function applyTheme(c) { body.style.backgroundColor = c; const d = isDarkColor(c); if(d){body.classList.add('text-white');body.classList.remove('text-gray-800');}else{body.classList.remove('text-white');body.classList.add('text-gray-800');} }
+        function isDarkColor(c) { const h = rgbToHex(c); if(!h)return false; const r=parseInt(h.substr(1,2),16),g=parseInt(h.substr(3,2),16),b=parseInt(h.substr(5,2),16); return ((r*299+g*587+b*114)/1000)<128; }
+        
+        function exportData() { if(!modal.classList.contains('hidden') && currentSettingsTab!=='common') saveTempFormData(currentSettingsTab); const s = JSON.stringify(appData); const b = new Blob([s],{type:"application/json"}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `chiikuji_meishi_v2_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }
+        function importData(i) { const f = i.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { try { const d = JSON.parse(e.target.result); if(confirm('データを上書きしますか？')) { appData = d; localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); alert('読み込みました。更新します。'); location.reload(); } } catch(err){ alert('エラー'); } }; r.readAsText(f); i.value = ''; }
+
+        function copyProfileFromMain(tabName, targetKey) {
+            const keys = (tabName === 'portfolio') ? portfolioKeys : accountPlatformKeys;
+            const mainKey = keys[0];
+            const nameInput = document.getElementById(`name-${tabName}-${mainKey}`);
+            const imgInput = document.getElementById(`img-data-${tabName}-${mainKey}`);
+            if(!nameInput || !imgInput) return;
+            document.getElementById(`name-${tabName}-${targetKey}`).value = nameInput.value;
+            document.getElementById(`img-data-${tabName}-${targetKey}`).value = imgInput.value;
+            const p = document.getElementById(`preview-${tabName}-${targetKey}`);
+            const np = document.getElementById(`no-preview-${tabName}-${targetKey}`);
+            const c = document.getElementById(`clear-${tabName}-${targetKey}`);
+            if(imgInput.value) { p.src = imgInput.value; p.classList.remove('hidden'); np.classList.add('hidden'); c.classList.remove('hidden'); }
+            else { p.classList.add('hidden'); np.classList.remove('hidden'); c.classList.add('hidden'); }
+        }
+
+        function focusCard(key) { currentFocusKey = key; updateFocusContent(key, 'in'); focusContainer.classList.add('active'); }
+        function updateFocusContent(key, animType) {
+            const data = appData[currentTab]; const item = data[key]; if(!item) return;
+            const config = platformConfig[key]; const tabConfig = data.config || {};
+            focusContainer.style.backgroundImage = tabConfig.bgImage ? `url('${tabConfig.bgImage}')` : '';
+            const cardColor = item.cardBgColor || '#ffffff';
+            focusCardEl.style.backgroundColor = cardColor;
+            focusCardEl.className = `meishi-card ${isDarkColor(cardColor) ? 'text-content-white' : ''}`;
+            void focusCardEl.offsetWidth;
+            if(animType) focusCardEl.classList.add(animType === 'next' ? 'anim-slide-in-right' : animType === 'prev' ? 'anim-slide-in-left' : 'anim-slide-down-in');
+            
+            if(item.image) focusIconContainer.innerHTML = `<img src="${item.image}" class="focus-icon">`;
+            else focusIconContainer.innerHTML = `<div class="focus-icon bg-gray-50 flex items-center justify-center text-4xl text-gray-300"><i class="fa-solid fa-user"></i></div>`;
+            
             focusNameEl.textContent = item.name || config.label;
             focusLabelContainer.innerHTML = `<i class="${config.icon} ${config.color} mr-2"></i> ${config.label}`;
-
-            // QRコード
-            focusQrTarget.innerHTML = '';
-            new QRCode(focusQrTarget, {
-                text: item.url,
-                width: 256,
-                height: 256,
-                colorDark : item.qrColor || config.defaultQrColor || "#000000",
-                colorLight : item.qrBgColor || "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-
-            // 下部ナビゲーションの再構築
-            renderFocusNav(data, key);
-        }
-
-        function renderFocusNav(data, activeKey) {
-            const activeKeys = platformKeys.filter(k => data[k] && data[k].url);
-            let navHtml = '';
             
+            focusQrTarget.innerHTML = '';
+            new QRCode(focusQrTarget, { text: item.url, width: 256, height: 256, colorDark : item.qrColor || config.defaultQrColor || "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+            
+            const activeKeys = getCurrentKeys().filter(k => data[k] && data[k].url);
+            let navHtml = '';
             activeKeys.forEach(k => {
-                const navItem = data[k];
-                const isActive = k === activeKey ? 'active' : '';
+                const navItem = data[k]; const isActive = k === key ? 'active' : '';
                 const navConfig = platformConfig[k];
-                
-                let navIconImg = navItem.image 
-                    ? `<img src="${navItem.image}" class="nav-icon">`
-                    : `<div class="nav-icon flex items-center justify-center text-gray-400 text-lg"><i class="fa-solid fa-user"></i></div>`;
-                
-                const badgeHtml = `<div class="platform-badge ${navConfig.badgeBg} ${navConfig.badgeClass}"><i class="${navConfig.icon}"></i></div>`;
-                
-                navHtml += `
-                    <div class="nav-item-wrapper ${isActive}" onclick="event.stopPropagation(); switchTo('${k}')">
-                        ${navIconImg}
-                        ${badgeHtml}
-                    </div>
-                `;
+                let navIcon = navItem.image ? `<img src="${navItem.image}" class="nav-icon">` : `<div class="nav-icon flex items-center justify-center text-gray-400 text-lg"><i class="fa-solid fa-user"></i></div>`;
+                navHtml += `<div class="nav-item-wrapper ${isActive}" onclick="event.stopPropagation(); switchTo('${k}')">${navIcon}<div class="platform-badge ${navConfig.badgeBg} ${navConfig.badgeClass}"><i class="${navConfig.icon}"></i></div></div>`;
             });
             focusBottomNav.innerHTML = navHtml;
         }
 
         function switchTo(key) {
-            if (key === currentFocusKey) return;
-            const activeKeys = platformKeys.filter(k => appData[currentTab][k]?.url);
+            if(key === currentFocusKey) return;
+            const activeKeys = getCurrentKeys().filter(k => appData[currentTab][k]?.url);
             const curIdx = activeKeys.indexOf(currentFocusKey);
             const newIdx = activeKeys.indexOf(key);
-            const dir = newIdx > curIdx ? 'next' : 'prev';
             currentFocusKey = key;
-            updateFocusContent(key, dir);
+            updateFocusContent(key, newIdx > curIdx ? 'next' : 'prev');
         }
 
-        // --- Swipe Logic ---
-        
-        function handleTouchStart(e) { 
-            touchStartX = e.touches[0].clientX; 
-            touchStartY = e.touches[0].clientY;
-        }
-        function handleTouchEnd(e) { 
-            touchEndX = e.changedTouches[0].clientX; 
-            touchEndY = e.changedTouches[0].clientY;
-            handleSwipeGesture(); 
-        }
-
+        function handleTouchStart(e) { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; }
+        function handleTouchEnd(e) { touchEndX = e.changedTouches[0].clientX; touchEndY = e.changedTouches[0].clientY; handleSwipeGesture(); }
         function handleSwipeGesture() {
-            const diffX = touchStartX - touchEndX;
-            const diffY = touchStartY - touchEndY;
-            const threshold = 50; 
-
-            // 垂直スワイプ判定 (Vertical)
-            if (Math.abs(diffY) > Math.abs(diffX)) {
-                if (diffY > threshold) {
-                    // 上スワイプ (Swipe Up) -> 閉じる
-                    focusCardEl.classList.add('anim-slide-up-out');
-                    setTimeout(() => { closeFocus(); }, 250);
-                } else if (diffY < -threshold) {
-                    // 下スワイプ (Swipe Down) -> アカウント切り替え
-                    switchAccountInFocus();
-                }
-                return;
-            }
-
-            // 水平スワイプ判定 (Horizontal)
-            if (Math.abs(diffX) < threshold) return;
-
-            const data = appData[currentTab];
-            const activeKeys = platformKeys.filter(k => data[k] && data[k].url);
-            if (activeKeys.length <= 1) return;
-
-            const currentIndex = activeKeys.indexOf(currentFocusKey);
-            
-            if (diffX > 0) {
-                // Next
-                const nextIndex = (currentIndex + 1) % activeKeys.length;
-                currentFocusKey = activeKeys[nextIndex];
-                updateFocusContent(currentFocusKey, 'next');
-            } else {
-                // Prev
-                const prevIndex = (currentIndex - 1 + activeKeys.length) % activeKeys.length;
-                currentFocusKey = activeKeys[prevIndex];
-                updateFocusContent(currentFocusKey, 'prev');
+            const diffX = touchStartX - touchEndX; const diffY = touchStartY - touchEndY;
+            if(Math.abs(diffY) > 50) {
+                if(diffY > 50) { focusCardEl.classList.add('anim-slide-up-out'); setTimeout(() => { closeFocus(); }, 250); }
+                else if(diffY < -50) { /* Next account logic if needed */ }
+            } else if(Math.abs(diffX) > 50) {
+                const data = appData[currentTab];
+                const activeKeys = getCurrentKeys().filter(k => data[k] && data[k].url);
+                const idx = activeKeys.indexOf(currentFocusKey);
+                if(idx === -1) return;
+                let nextIdx;
+                if(diffX > 0) { nextIdx = (idx + 1) % activeKeys.length; updateFocusContent(activeKeys[nextIdx], 'next'); currentFocusKey = activeKeys[nextIdx]; }
+                else { nextIdx = (idx - 1 + activeKeys.length) % activeKeys.length; updateFocusContent(activeKeys[nextIdx], 'prev'); currentFocusKey = activeKeys[nextIdx]; }
             }
         }
-
-        function switchAccountInFocus() {
-            // アカウント切り替えロジック
-            const nextTab = currentTab === 'account1' ? 'account2' : 'account1';
-            const nextData = appData[nextTab];
-            
-            // 切り替え先のアカウントにデータがあるかチェック
-            const hasData = platformKeys.some(k => nextData[k] && nextData[k].url);
-            if (!hasData) return; // データがなければ何もしない
-
-            // 現在と同じキーがあるか？
-            let nextKey = currentFocusKey;
-            if (!nextData[nextKey] || !nextData[nextKey].url) {
-                // なければ一番最初の有効なキーを探す
-                const activeKeys = platformKeys.filter(k => nextData[k] && nextData[k].url);
-                if (activeKeys.length > 0) {
-                    nextKey = activeKeys[0];
-                } else {
-                    return; 
-                }
-            }
-
-            // 実行
-            currentTab = nextTab;
-            currentFocusKey = nextKey;
-            
-            // 裏側のリストも更新しておく（閉じたときのため）
-            updateTabUI();
-            renderList();
-            const theme = appData[currentTab].config?.themeColor || '#f8f9fa';
-            applyTheme(theme);
-
-            // 拡大画面を更新 (アニメーションは上から降ってくるイメージで 'down' とするが、今回は再利用)
-            updateFocusContent(nextKey, 'down');
-        }
-
-        function closeFocus() {
-            focusContainer.classList.remove('active');
-            focusCardEl.classList.remove('anim-slide-up-out'); // cleanup
-            currentFocusKey = null;
-        }
-
-        // --- Standard Functions ---
-
-        function renderSettingsForm(tabName) {
-            settingsContainer.innerHTML = '';
-            const tabConfig = appData[tabName].config || {};
-            document.getElementById('setting-tab-name').value = tabConfig.tabName || (tabName === 'account1' ? 'Account 1' : 'Account 2');
-            
-            const bgData = tabConfig.bgImage || '';
-            document.getElementById('setting-bg-data').value = bgData;
-            const bgPreview = document.getElementById('bg-preview-container');
-            if(bgData) {
-                bgPreview.style.backgroundImage = `url('${bgData}')`;
-                document.getElementById('bg-no-image').classList.add('hidden');
-                document.getElementById('btn-clear-bg').classList.remove('hidden');
-            } else {
-                bgPreview.style.backgroundImage = '';
-                document.getElementById('bg-no-image').classList.remove('hidden');
-                document.getElementById('btn-clear-bg').classList.add('hidden');
-            }
-
-            const themeColor = tabConfig.themeColor || '#f8f9fa';
-            updateColorButtons(themeColor);
-
-            platformKeys.forEach((key, index) => {
-                const config = platformConfig[key];
-                const currentVal = appData[tabName][key] || { url: '', name: '', image: '', qrColor: config.defaultQrColor, qrBgColor: '#FFFFFF' };
-                
-                let copyBtnHtml = '';
-                if (index > 0) {
-                    copyBtnHtml = `
-                        <button type="button" onclick="copyProfileFromMain('${tabName}', '${key}')" class="text-xs text-indigo-600 font-bold hover:bg-indigo-50 px-2 py-1 rounded transition ml-auto border border-indigo-100">
-                            <i class="fa-regular fa-copy mr-1"></i>アイコンと名前をコピー
-                        </button>
-                    `;
-                }
-
-                const html = `
-                    <div class="bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-100 relative">
-                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-50">
-                            <label class="block text-sm font-bold text-gray-700 flex items-center">
-                                <i class="${config.icon} ${config.color} mr-2 text-lg w-6 text-center"></i>
-                                ${config.label}
-                            </label>
-                            ${copyBtnHtml}
-                        </div>
-                        <div class="space-y-4">
-                            <div class="flex items-center space-x-4">
-                                <div class="relative">
-                                    <img id="preview-${tabName}-${key}" src="${currentVal.image || ''}" class="img-preview shadow-sm ${currentVal.image ? '' : 'hidden'}">
-                                    <div id="no-preview-${tabName}-${key}" class="img-preview bg-gray-50 flex items-center justify-center text-gray-300 ${currentVal.image ? 'hidden' : ''}"><i class="fa-solid fa-user"></i></div>
-                                </div>
-                                <div class="flex flex-col space-y-2">
-                                    <label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center font-medium">
-                                        <i class="fa-solid fa-camera mr-1"></i> アイコンを選択
-                                        <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(this, '${tabName}', '${key}')">
-                                    </label>
-                                    <button type="button" onclick="clearImage('${tabName}', '${key}')" class="text-xs text-red-400 hover:text-red-600 ${currentVal.image ? '' : 'hidden'} text-left px-1" id="clear-${tabName}-${key}"><i class="fa-solid fa-trash mr-1"></i>削除</button>
-                                </div>
-                                <input type="hidden" id="img-data-${tabName}-${key}" value="${currentVal.image || ''}">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-400 mb-1">表示名</label>
-                                <input type="text" id="name-${tabName}-${key}" value="${currentVal.name || ''}" placeholder="例: @my_account" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition font-medium text-gray-800">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-400 mb-1">リンクURL</label>
-                                <input type="url" id="input-${tabName}-${key}" value="${currentVal.url || ''}" placeholder="https://..." class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition text-gray-600">
-                            </div>
-                            <div class="flex items-center space-x-4 pt-2 border-t border-gray-50">
-                                <div class="flex flex-col">
-                                    <label class="text-[10px] font-bold text-gray-400 mb-1">QRコード色</label>
-                                    <div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200">
-                                        <input type="color" id="qr-color-${tabName}-${key}" value="${currentVal.qrColor || config.defaultQrColor || '#000000'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0">
-                                    </div>
-                                </div>
-                                <div class="flex flex-col">
-                                    <label class="text-[10px] font-bold text-gray-400 mb-1">背景色</label>
-                                    <div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200">
-                                        <input type="color" id="qr-bg-${tabName}-${key}" value="${currentVal.qrBgColor || '#FFFFFF'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                settingsContainer.insertAdjacentHTML('beforeend', html);
-            });
-        }
-
-        function updateAppIcons() {
-            const searchOrder = platformKeys;
-            let targetImage = null;
-            if (appData.account1) {
-                for (const key of searchOrder) {
-                    if (appData.account1[key]?.image) {
-                        targetImage = appData.account1[key].image;
-                        break;
-                    }
-                }
-            }
-            if (!targetImage && appData.account2) {
-                for (const key of searchOrder) {
-                    if (appData.account2[key]?.image) {
-                        targetImage = appData.account2[key].image;
-                        break;
-                    }
-                }
-            }
-            if (targetImage) {
-                const appleIcon = document.getElementById('app-icon-apple');
-                const defaultIcon = document.getElementById('app-icon-default');
-                if (appleIcon) appleIcon.href = targetImage;
-                if (defaultIcon) defaultIcon.href = targetImage;
-            }
-        }
+        function closeFocus() { focusContainer.classList.remove('active'); focusCardEl.classList.remove('anim-slide-up-out'); currentFocusKey = null; }
 
         function renderShareQR() {
             const container = document.getElementById('share-app-qr');
@@ -777,319 +707,12 @@
             if(!container) return;
             const currentURL = window.location.href.split('#')[0];
             container.innerHTML = '';
-            urlDisplay.textContent = currentURL;
-            new QRCode(container, {
-                text: currentURL,
-                width: 128,
-                height: 128,
-                colorDark : "#4f46e5",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
-            });
-        }
-
-        function setThemeColor(color) {
-            document.getElementById('setting-theme-color').value = color;
-            updateColorButtons(color);
-        }
-
-        function updateColorButtons(activeColor) {
-            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('selected'));
-            document.getElementById('custom-theme-color').value = activeColor;
-            const btns = document.querySelectorAll('.color-btn');
-            for(let btn of btns) {
-                if (rgbToHex(btn.style.backgroundColor) === activeColor.toLowerCase() || btn.style.backgroundColor === activeColor) {
-                    btn.classList.add('selected');
-                }
-            }
-        }
-        
-        function rgbToHex(rgb) {
-            if (!rgb) return '';
-            if (rgb.startsWith('#')) return rgb.toLowerCase();
-            const rgbValues = rgb.match(/\d+/g);
-            if (!rgbValues) return rgb;
-            return "#" + ((1 << 24) + (parseInt(rgbValues[0]) << 16) + (parseInt(rgbValues[1]) << 8) + parseInt(rgbValues[2])).toString(16).slice(1).toLowerCase();
-        }
-
-        function applyTheme(color) {
-            body.style.backgroundColor = color;
-            const isDark = isDarkColor(color);
-            if (isDark) {
-                body.classList.add('text-white');
-                body.classList.remove('text-gray-800');
-            } else {
-                body.classList.remove('text-white');
-                body.classList.add('text-gray-800');
-            }
-        }
-
-        function isDarkColor(color) {
-            const hex = rgbToHex(color);
-            if (!hex) return false;
-            const r = parseInt(hex.substr(1, 2), 16);
-            const g = parseInt(hex.substr(3, 2), 16);
-            const b = parseInt(hex.substr(5, 2), 16);
-            return ((r * 299 + g * 587 + b * 114) / 1000) < 128;
-        }
-
-        function exportData() {
-            if(!modal.classList.contains('hidden')) {
-                saveTempFormData(currentSettingsTab);
-            }
-            const dataStr = JSON.stringify(appData);
-            const blob = new Blob([dataStr], {type: "application/json"});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
-            a.download = `chiikuji_meishi_backup_${date}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        function importData(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (importedData.account1 && importedData.account2) {
-                        if (confirm('現在のデータを上書きして読み込みますか？')) {
-                            appData = importedData;
-                            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-                            alert('データを読み込みました。画面を更新します。');
-                            location.reload();
-                        }
-                    } else {
-                        alert('無効なファイル形式です。');
-                    }
-                } catch (err) {
-                    alert('ファイルの読み込みに失敗しました。');
-                    console.error(err);
-                }
-            };
-            reader.readAsText(file);
-            input.value = '';
-        }
-
-        function switchTab(tabName) {
-            currentTab = tabName;
-            updateTabUI();
-            renderList();
-            const theme = appData[currentTab].config?.themeColor || '#f8f9fa';
-            applyTheme(theme);
-        }
-
-        function updateTabUI() {
-            const name1 = appData.account1.config?.tabName || 'Account 1';
-            const name2 = appData.account2.config?.tabName || 'Account 2';
-            const btn1 = document.getElementById('tab-btn-account1');
-            const btn2 = document.getElementById('tab-btn-account2');
-            btn1.textContent = name1;
-            btn2.textContent = name2;
-            const activeClass = 'flex-1 py-3 text-sm text-center transition tab-active truncate px-2';
-            const inactiveClass = 'flex-1 py-3 text-sm text-center transition tab-inactive truncate px-2';
-            if (currentTab === 'account1') {
-                btn1.className = activeClass;
-                btn2.className = inactiveClass;
-            } else {
-                btn1.className = inactiveClass;
-                btn2.className = activeClass;
-            }
-        }
-
-        function updateSettingsTabUI() {
-            const name1 = appData.account1.config?.tabName || 'Account 1';
-            const name2 = appData.account2.config?.tabName || 'Account 2';
-            document.getElementById('set-tab-account1').textContent = name1;
-            document.getElementById('set-tab-account2').textContent = name2;
-            const activeClass = "flex-1 py-3 text-xs font-bold text-center border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50 truncate px-1";
-            const inactiveClass = "flex-1 py-3 text-xs font-bold text-center border-b-2 border-transparent text-gray-500 hover:bg-gray-50 truncate px-1";
-            document.getElementById('set-tab-account1').className = currentSettingsTab === 'account1' ? activeClass : inactiveClass;
-            document.getElementById('set-tab-account2').className = currentSettingsTab === 'account2' ? activeClass : inactiveClass;
-        }
-
-        function switchSettingsTab(tabName) {
-            if (!modal.classList.contains('hidden')) {
-                saveTempFormData(currentSettingsTab);
-            }
-            currentSettingsTab = tabName;
-            updateSettingsTabUI();
-            renderSettingsForm(tabName);
-        }
-
-        function openSettings() {
-            currentSettingsTab = currentTab;
-            updateSettingsTabUI();
-            renderSettingsForm(currentTab);
-            renderShareQR();
-            modal.classList.remove('hidden');
-        }
-
-        function closeSettings() {
-            modal.classList.add('hidden');
-        }
-
-        function showAddToHomeGuide() { guideModal.classList.remove('hidden'); }
-        function closeAddToHomeGuide() { guideModal.classList.add('hidden'); }
-
-        function saveTempFormData(tabName) {
-            const tabNameInput = document.getElementById('setting-tab-name');
-            const bgInput = document.getElementById('setting-bg-data');
-            const themeInput = document.getElementById('setting-theme-color');
-            if (!tabNameInput) return;
-            if (!appData[tabName]) appData[tabName] = {};
-            if (!appData[tabName].config) appData[tabName].config = {};
-            if(tabNameInput) appData[tabName].config.tabName = tabNameInput.value.trim();
-            if(bgInput) appData[tabName].config.bgImage = bgInput.value;
-            if(themeInput) appData[tabName].config.themeColor = themeInput.value;
-            platformKeys.forEach(key => {
-                const urlInput = document.getElementById(`input-${tabName}-${key}`);
-                if (!urlInput) return;
-                const qrColorInput = document.getElementById(`qr-color-${tabName}-${key}`);
-                const qrBgInput = document.getElementById(`qr-bg-${tabName}-${key}`);
-                appData[tabName][key] = {
-                    url: urlInput.value.trim(),
-                    name: document.getElementById(`name-${tabName}-${key}`).value.trim(),
-                    image: document.getElementById(`img-data-${tabName}-${key}`).value,
-                    qrColor: qrColorInput ? qrColorInput.value : '#000000',
-                    qrBgColor: qrBgInput ? qrBgInput.value : '#FFFFFF'
-                };
-            });
-        }
-
-        function saveAndRegenerate() {
-            saveTempFormData(currentSettingsTab);
+            if(urlDisplay) urlDisplay.textContent = currentURL;
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-                updateAppIcons();
-                closeSettings();
-                switchTab(currentSettingsTab);
-            } catch (e) {
-                alert('データ量が大きすぎます。画像を減らすか、小さい画像を使用してください。');
-                console.error(e);
-            }
+                new QRCode(container, { text: currentURL, width: 128, height: 128, colorDark : "#4f46e5", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.M });
+            } catch(e) { console.error("QRCode generation failed", e); }
         }
 
-        function loadData() {
-            initializeList(); 
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                try {
-                    appData = JSON.parse(stored);
-                    if (!appData.account1) appData.account1 = { config: { tabName: 'Account 1' } };
-                    if (!appData.account2) appData.account2 = { config: { tabName: 'Account 2' } };
-                } catch(e) { console.error(e); }
-            }
-            const theme = appData[currentTab].config?.themeColor || '#f8f9fa';
-            applyTheme(theme);
-            updateTabUI();
-            renderList();
-            updateAppIcons();
-        }
-
-        function handleImageUpload(input, tabName, key) {
-            processImage(input, 150, 0.7, (dataUrl) => {
-                document.getElementById(`img-data-${tabName}-${key}`).value = dataUrl;
-                const preview = document.getElementById(`preview-${tabName}-${key}`);
-                const noPreview = document.getElementById(`no-preview-${tabName}-${key}`);
-                preview.src = dataUrl;
-                preview.classList.remove('hidden');
-                noPreview.classList.add('hidden');
-                document.getElementById(`clear-${tabName}-${key}`).classList.remove('hidden');
-            });
-        }
-
-        function handleBgUpload(input) {
-            processImage(input, 600, 0.6, (dataUrl) => {
-                document.getElementById('setting-bg-data').value = dataUrl;
-                const preview = document.getElementById('bg-preview-container');
-                preview.style.backgroundImage = `url('${dataUrl}')`;
-                document.getElementById('bg-no-image').classList.add('hidden');
-                document.getElementById('btn-clear-bg').classList.remove('hidden');
-            });
-        }
-
-        function processImage(input, maxSize, quality, callback) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > height) {
-                        if (width > maxSize) { height *= maxSize / width; width = maxSize; }
-                    } else {
-                        if (height > maxSize) { width *= maxSize / height; height = maxSize; }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.drawImage(img, 0, 0, width, height);
-                    callback(canvas.toDataURL('image/jpeg', quality));
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function clearImage(tabName, key) {
-            document.getElementById(`img-data-${tabName}-${key}`).value = '';
-            document.getElementById(`preview-${tabName}-${key}`).classList.add('hidden');
-            document.getElementById(`no-preview-${tabName}-${key}`).classList.remove('hidden');
-            document.getElementById(`clear-${tabName}-${key}`).classList.add('hidden');
-        }
-
-        function clearBg() {
-            document.getElementById('setting-bg-data').value = '';
-            document.getElementById('bg-preview-container').style.backgroundImage = '';
-            document.getElementById('bg-no-image').classList.remove('hidden');
-            document.getElementById('btn-clear-bg').classList.add('hidden');
-        }
-
-        function renderList() {
-            const data = appData[currentTab] || {};
-            let activeCount = 0;
-            platformKeys.forEach(key => {
-                const item = data[key] || {};
-                const url = item.url;
-                const card = document.getElementById(`card-${key}`);
-                const nameContainer = document.getElementById(`display-name-${key}`);
-                const iconImg = document.getElementById(`icon-${key}`);
-                const noIconDiv = document.getElementById(`no-icon-${key}`);
-                if (url) {
-                    card.classList.remove('hidden-card');
-                    card.style.display = 'flex'; 
-                    activeCount++;
-                    nameContainer.textContent = item.name || platformConfig[key].label;
-                    if (item.image) {
-                        iconImg.src = item.image;
-                        iconImg.classList.remove('hidden');
-                        noIconDiv.classList.add('hidden');
-                    } else {
-                        iconImg.classList.add('hidden');
-                        noIconDiv.classList.remove('hidden');
-                    }
-                } else {
-                    card.classList.add('hidden-card');
-                    card.style.display = 'none';
-                }
-            });
-            if (activeCount === 0) {
-                listContainer.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-            } else {
-                listContainer.classList.remove('hidden');
-                emptyState.classList.add('hidden');
-            }
-        }
     </script>
 </body>
 </html>
