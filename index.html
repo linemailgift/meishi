@@ -39,7 +39,7 @@
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-            transition: background-color 0.5s ease;
+            transition: background-color 0.3s ease;
             -webkit-tap-highlight-color: transparent;
             background-color: #f8f9fa; 
             min-height: 100vh;
@@ -94,6 +94,16 @@
             width: 180px !important; height: 180px !important;
             margin: 0 auto; border-radius: 4px; background-color: white; padding: 4px; 
         }
+        
+        /* QRコードがクリック可能であることを示すスタイル */
+        .qr-code-container {
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .qr-code-container:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
 
         .bottom-nav {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 110px;
@@ -126,11 +136,15 @@
             font-size: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); z-index: 10;
         }
 
-        .list-item { transition: transform 0.2s, box-shadow 0.2s; backdrop-filter: blur(4px); }
-        .list-item:active { transform: scale(0.98); }
+        .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 700; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #9ca3af; font-weight: 500; }
+
+        /* Rename list-item to card-item to avoid conflicts with Tailwind's list-item utility */
+        .card-item { transition: transform 0.2s, box-shadow 0.2s; backdrop-filter: blur(4px); }
+        .card-item:active { transform: scale(0.98); }
         .hidden-card { display: none !important; }
         
-        .list-icon { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .list-icon { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .focus-icon { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .img-preview { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb; background-color: #fff; }
 
@@ -249,14 +263,25 @@
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
             <button onclick="closeAddToHomeGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
             <div class="text-center mb-6"><i class="fa-solid fa-share-nodes text-4xl text-indigo-500 mb-3"></i><h3 class="text-lg font-bold text-gray-800">ホーム画面に追加</h3><p class="text-xs text-gray-500 mt-1">アイコン付きでアプリとして使えます</p></div>
+            
             <div class="space-y-4 text-sm text-gray-600">
                 <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100">
                     <p class="text-xs text-yellow-800 font-bold mb-2"><i class="fa-solid fa-circle-exclamation mr-1"></i> アプリモードで開いている場合</p>
                     <p class="text-xs mb-3">この画面には共有ボタンがありません。<br>以下の手順でブラウザを開いてください。</p>
-                    <div class="flex items-center gap-2 mb-2"><input type="text" id="copy-pwa-url-input" class="w-full bg-white border border-gray-300 text-xs p-2 rounded text-gray-600" readonly><button onclick="copyPwaUrl()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-indigo-700 whitespace-nowrap">コピー</button></div>
+                    
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="text" id="copy-pwa-url-input" class="w-full bg-white border border-gray-300 text-xs p-2 rounded text-gray-600" readonly>
+                        <button onclick="copyPwaUrl()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-indigo-700 whitespace-nowrap">コピー</button>
+                    </div>
                     <p id="copy-pwa-msg" class="text-[10px] text-green-600 h-4 hidden text-center mb-2">コピーしました！</p>
-                    <ol class="list-decimal list-inside space-y-1 pl-1 text-xs"><li><strong>Safari/Chrome</strong>アプリを自分で開く</li><li>アドレスバーにURLを貼り付けて開く</li><li>その画面で「共有」→「ホーム画面に追加」</li></ol>
+                    
+                    <ol class="list-decimal list-inside space-y-1 pl-1 text-xs">
+                        <li><strong>Safari/Chrome</strong>アプリを自分で開く</li>
+                        <li>アドレスバーにURLを貼り付けて開く</li>
+                        <li>その画面で「共有」→「ホーム画面に追加」</li>
+                    </ol>
                 </div>
+
                 <div class="border-t pt-4">
                     <h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-apple text-lg mr-2"></i> iPhone (Safari)</h4>
                     <p class="text-xs text-gray-500">ブラウザで開いている場合:</p>
@@ -288,8 +313,15 @@
             <div id="focus-icon-container" class="mb-4"></div>
             <h2 id="focus-name" class="text-lg font-bold text-gray-800 mb-2 leading-tight line-clamp-2"></h2>
             <div id="focus-label-container" class="flex items-center justify-center text-gray-500 mb-6 text-xs font-bold uppercase tracking-widest"></div>
-            <div id="focus-qr-target" class="qr-code-container bg-white p-2 rounded-xl shadow-inner border border-gray-100 mb-6"></div>
-            <button onclick="closeFocus()" class="mt-2 text-gray-400 text-sm hover:text-gray-600"><i class="fa-solid fa-xmark mr-1"></i> 閉じる (上スワイプ)</button>
+            
+            <div id="focus-qr-target" class="qr-code-container bg-white p-2 rounded-xl shadow-inner border border-gray-100 mb-4" onclick="openCurrentLink()"></div>
+            
+            <!-- リンクを開くボタン -->
+            <button onclick="openCurrentLink()" class="mb-3 bg-indigo-600 text-white text-sm font-bold py-2 px-6 rounded-full shadow-md hover:bg-indigo-700 transition transform active:scale-95 flex items-center">
+                <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> リンクを開く
+            </button>
+
+            <button onclick="closeFocus()" class="mt-1 text-gray-400 text-sm hover:text-gray-600"><i class="fa-solid fa-xmark mr-1"></i> 閉じる (上スワイプ)</button>
         </div>
         <div id="focus-bottom-nav" class="bottom-nav" onclick="event.stopPropagation()"></div>
     </div>
@@ -366,6 +398,15 @@
             focusContainer.addEventListener('touchend', handleTouchEnd);
         });
 
+        // --- Link Open Logic ---
+        function openCurrentLink() {
+            const data = appData[currentTab];
+            const item = data[currentFocusKey];
+            if (item && item.url) {
+                window.open(item.url, '_blank');
+            }
+        }
+
         // --- Tutorial Logic ---
         function nextTutorialStep() {
             const currentStepEl = document.querySelector(`.tutorial-step[data-step="${tutorialCurrentStep}"]`);
@@ -423,16 +464,13 @@
                 const theme = appData[t]?.config?.themeColor || '#f8f9fa';
                 btn.textContent = name;
                 
-                // 全てのタブに色を適用し、アクティブ・非アクティブを透過度で表現
                 btn.style.backgroundColor = theme;
                 btn.style.color = isDarkColor(theme) ? 'white' : '#374151';
                 
                 if (currentTab === t) {
-                    // Active
                     btn.style.opacity = '1';
-                    btn.style.borderBottom = '4px solid rgba(0,0,0,0.2)'; // 強調線
+                    btn.style.borderBottom = '4px solid rgba(0,0,0,0.2)';
                 } else {
-                    // Inactive
                     btn.style.opacity = '0.5';
                     btn.style.borderBottom = 'none';
                 }
@@ -523,20 +561,18 @@
                     const textColorClass = isDarkColor(cardColor) ? 'text-content-white' : '';
                     
                     const itemHtml = `
-                        <div id="card-${key}" class="list-item rounded-2xl shadow-sm p-4 flex items-center space-x-4 cursor-pointer border border-white/50 ${textColorClass}" 
+                        <div id="card-${key}" class="card-item rounded-xl shadow-sm p-2 flex items-center space-x-3 cursor-pointer border border-white/50 ${textColorClass}" 
                              style="background-color: ${cardColor};" onclick="focusCard('${key}')">
                             <div class="relative flex-shrink-0">
                                 <img id="icon-${key}" src="${item.image || ''}" class="list-icon ${item.image ? '' : 'hidden'} bg-gray-50">
                                 <div id="no-icon-${key}" class="list-icon ${item.image ? 'hidden' : ''} bg-gray-50 flex items-center justify-center text-gray-300 text-2xl"><i class="fa-solid fa-user"></i></div>
-                                <div class="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm border border-gray-100 z-10">
-                                    <i class="${config.icon} ${config.color} text-sm w-4 h-4 flex items-center justify-center"></i>
+                                <div class="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-gray-100 z-10">
+                                    <i class="${config.icon} ${config.color} text-xl w-7 h-7 flex items-center justify-center"></i>
                                 </div>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="text-[10px] font-bold opacity-60 uppercase tracking-wider mb-0.5">${config.label}</div>
-                                <div id="display-name-${key}" class="font-bold text-lg truncate">${item.name || config.label}</div>
+                            <div class="flex-1 min-w-0 pl-2">
+                                <div id="display-name-${key}" class="font-bold text-base truncate leading-tight">${item.name || config.label}</div>
                             </div>
-                            <div class="opacity-50"><i class="fa-solid fa-chevron-right"></i></div>
                         </div>
                     `;
                     listContainer.insertAdjacentHTML('beforeend', itemHtml);
@@ -559,7 +595,10 @@
                         <div class="flex items-center space-x-4 mb-2">
                             <img id="common-app-icon-preview" src="${appData.common?.appIcon || DEFAULT_ICON}" class="w-16 h-16 rounded-xl border border-gray-200 object-cover">
                             <div class="flex flex-col space-y-2">
-                                <label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center"><i class="fa-solid fa-image mr-1"></i> 画像を選択<input type="file" accept="image/*" class="hidden" onchange="handleCommonIconUpload(this)"></label>
+                                <label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center">
+                                    <i class="fa-solid fa-image mr-1"></i> 画像を選択
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleCommonIconUpload(this)">
+                                </label>
                                 <button onclick="clearCommonIcon()" class="text-xs text-red-400 hover:text-red-600 hidden" id="btn-clear-common-icon"><i class="fa-solid fa-trash mr-1"></i>削除</button>
                             </div>
                         </div>
@@ -785,6 +824,9 @@
         function rgbToHex(rgb) { if(!rgb)return ''; if(rgb.startsWith('#'))return rgb.toLowerCase(); const v = rgb.match(/\d+/g); if(!v)return rgb; return "#"+((1<<24)+(parseInt(v[0])<<16)+(parseInt(v[1])<<8)+parseInt(v[2])).toString(16).slice(1).toLowerCase(); }
         function applyTheme(c) { 
             appHeader.style.backgroundColor = c; 
+            // ここでbodyの背景色も変更
+            document.body.style.backgroundColor = c;
+            
             const d = isDarkColor(c);
             const contentColor = d ? 'white' : '#374151';
             appTitle.style.color = contentColor;
@@ -817,6 +859,14 @@
             focusContainer.style.backgroundImage = tabConfig.bgImage ? `url('${tabConfig.bgImage}')` : '';
             const cardColor = item.cardBgColor || '#ffffff';
             focusCardEl.style.backgroundColor = cardColor;
+            
+            // カードの文字色調整
+            if(isDarkColor(cardColor)) {
+                focusCardEl.classList.add('text-content-white');
+            } else {
+                focusCardEl.classList.remove('text-content-white');
+            }
+
             focusCardEl.className = `meishi-card ${isDarkColor(cardColor) ? 'text-content-white' : ''}`;
             void focusCardEl.offsetWidth;
             if(animType) focusCardEl.classList.add(animType === 'next' ? 'anim-slide-in-right' : animType === 'prev' ? 'anim-slide-in-left' : 'anim-slide-down-in');
