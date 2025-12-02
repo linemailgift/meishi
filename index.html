@@ -223,7 +223,7 @@
                     <h3 class="text-lg font-bold text-gray-800 mb-1">アイコンの色を選ぶ</h3>
                     <p class="text-[10px] text-gray-500 mb-4">テーマカラーとアイコンの色を設定</p>
                     
-                    <!-- パステルカラーピッカー (白 + パステル3色 + 黒) -->
+                    <!-- パステルカラーピッカー -->
                     <div class="flex flex-wrap justify-center gap-3 mb-4">
                         <button onclick="selectTutorialColor('#FFFFFF')" class="color-btn border border-gray-200" style="background-color: #FFFFFF;" title="White"></button>
                         <button onclick="selectTutorialColor('#F0F9FF')" class="color-btn" style="background-color: #F0F9FF;" title="Ice Blue"></button>
@@ -553,10 +553,17 @@
                 const name = appData[t]?.config?.tabName || (t.charAt(0).toUpperCase() + t.slice(1));
                 const theme = appData[t]?.config?.themeColor || '#f8f9fa';
                 btn.textContent = name;
+                
                 btn.style.backgroundColor = theme;
                 btn.style.color = isDarkColor(theme) ? 'white' : '#374151';
-                if (currentTab === t) { btn.style.opacity = '1'; btn.style.borderBottom = '4px solid rgba(0,0,0,0.2)'; } 
-                else { btn.style.opacity = '0.5'; btn.style.borderBottom = 'none'; }
+                
+                if (currentTab === t) {
+                    btn.style.opacity = '1';
+                    btn.style.borderBottom = '4px solid rgba(0,0,0,0.2)';
+                } else {
+                    btn.style.opacity = '0.5';
+                    btn.style.borderBottom = 'none';
+                }
             });
         }
 
@@ -581,13 +588,25 @@
             tabs.forEach(t => {
                 const btn = document.getElementById(`set-tab-${t}`); if(!btn) return;
                 const active = currentSettingsTab === t;
-                btn.style = ""; btn.className = "flex-1 min-w-[50px] py-3 text-xs font-bold text-center px-1 rounded-t-lg transition-all duration-200 border-b-4";
-                if(t === 'common') { btn.className += active ? " border-gray-400 bg-gray-200 text-gray-700" : " border-transparent text-gray-400 hover:bg-gray-50"; } 
-                else {
+                
+                btn.style = ""; // Reset
+                btn.className = "flex-1 min-w-[50px] py-3 text-xs font-bold text-center px-1 rounded-t-lg transition-all duration-200 border-b-4";
+
+                if(t === 'common') {
+                    btn.className += active ? " border-gray-400 bg-gray-200 text-gray-700" : " border-transparent text-gray-400 hover:bg-gray-50";
+                } else {
                     const theme = appData[t]?.config?.themeColor || '#f8f9fa';
                     btn.style.backgroundColor = theme;
-                    if (active) { btn.style.opacity = '1'; btn.style.borderColor = 'rgba(0,0,0,0.2)'; btn.style.color = isDarkColor(theme) ? 'white' : '#374151'; } 
-                    else { btn.style.opacity = '0.6'; btn.style.borderColor = 'transparent'; btn.style.color = isDarkColor(theme) ? 'rgba(255,255,255,0.8)' : 'rgba(55,65,81,0.8)'; }
+                    
+                    if (active) {
+                        btn.style.opacity = '1';
+                        btn.style.borderColor = 'rgba(0,0,0,0.2)';
+                        btn.style.color = isDarkColor(theme) ? 'white' : '#374151';
+                    } else {
+                        btn.style.opacity = '0.6';
+                        btn.style.borderColor = 'transparent';
+                        btn.style.color = isDarkColor(theme) ? 'rgba(255,255,255,0.8)' : 'rgba(55,65,81,0.8)';
+                    }
                     const name = appData[t]?.config?.tabName || (t.charAt(0).toUpperCase() + t.slice(1));
                     btn.textContent = name;
                 }
