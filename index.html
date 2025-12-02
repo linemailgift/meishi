@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="Chiikuji Meishi">
     <title>Chiikuji Meishi</title>
     
-    <!-- デフォルトアイコン -->
+    <!-- デフォルトアプリアイコン -->
     <link rel="apple-touch-icon" id="app-icon-apple" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=">
     <link rel="shortcut icon" id="app-icon-default" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=">
     
@@ -43,12 +43,12 @@
             -webkit-tap-highlight-color: transparent;
             background-color: #f8f9fa; 
             min-height: 100vh;
+            /* スワイプ操作を優先させる設定 */
             overscroll-behavior-y: none;
-            /* 重要：横スワイプでのブラウザバック等を防ぎ、アプリ内のスワイプ操作を優先させる */
-            touch-action: pan-y pinch-zoom;
+            touch-action: pan-y; 
         }
 
-        /* ヘッダーのスタイル調整（JSで背景色制御） */
+        /* ヘッダーのスタイル調整 */
         header {
             transition: background-color 0.3s ease, color 0.3s ease;
         }
@@ -97,7 +97,6 @@
             margin: 0 auto; border-radius: 4px; background-color: white; padding: 4px; 
         }
         
-        /* QRコードがクリック可能であることを示すスタイル */
         .qr-code-container {
             cursor: pointer;
             transition: transform 0.1s;
@@ -137,16 +136,21 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); z-index: 10;
         }
+        /* Xアイコン用 (画像) */
+        .platform-badge-img {
+            position: absolute; bottom: -2px; right: -2px; width: 22px; height: 22px;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); z-index: 10;
+            object-fit: cover;
+        }
 
         .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 700; }
         .tab-inactive { border-bottom: 3px solid transparent; color: #9ca3af; font-weight: 500; }
 
-        /* Rename list-item to card-item to avoid conflicts with Tailwind's list-item utility */
         .card-item { transition: transform 0.2s, box-shadow 0.2s; backdrop-filter: blur(4px); }
         .card-item:active { transform: scale(0.98); }
         .hidden-card { display: none !important; }
         
-        /* リストアイコン（顔写真）のサイズ調整: 60px */
         .list-icon { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         
         .focus-icon { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
@@ -170,9 +174,6 @@
         .bg-black { background-color: #000000; }
         .bg-white { background-color: #ffffff; }
         .text-indigo-500 { color: #6366f1; }
-
-        /* X アイコン用の特別なスタイル */
-        .x-icon-text { font-family: sans-serif; font-weight: bold; line-height: 1; }
 
     </style>
 </head>
@@ -201,11 +202,11 @@
         <div id="qr-list" class="space-y-3 pb-8"></div>
     </main>
 
-    <!-- チュートリアルモーダル (初回・ブラウザ誘導重視) -->
+    <!-- チュートリアルモーダル -->
     <div id="tutorial-modal" class="hidden fixed inset-0 bg-black/90 z-[70] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden relative">
             <div id="tutorial-steps" class="p-6 text-center min-h-[340px] flex flex-col justify-center items-center">
-                <!-- Step 1: 警告と誘導 -->
+                <!-- Step 1 -->
                 <div class="tutorial-step" data-step="1">
                     <div class="mb-4 text-red-500 text-5xl animate-bounce"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">データ消失の注意</h3>
@@ -213,23 +214,14 @@
                         アプリ内ブラウザ（LINEやTwitterなど）で見ている場合、<strong>データを登録しても消えてしまいます！</strong>
                     </p>
                     <p class="text-sm font-bold text-indigo-600 mb-2">まずはブラウザで開き直してください</p>
-                    
                     <div class="flex items-center gap-2 mb-2 w-full">
                         <input type="text" id="tut-copy-url" class="flex-1 bg-gray-100 border border-gray-300 text-xs p-2 rounded text-gray-500" readonly>
-                        <button onclick="copyUrlFromTutorial()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-indigo-700 whitespace-nowrap">
-                            <i class="fa-regular fa-copy mr-1"></i>コピー
-                        </button>
+                        <button onclick="copyUrlFromTutorial()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-indigo-700 whitespace-nowrap"><i class="fa-regular fa-copy mr-1"></i>コピー</button>
                     </div>
                     <p id="tut-copy-msg" class="text-[10px] text-green-600 h-4 hidden">コピーしました！</p>
-                    
-                    <div class="text-[10px] text-gray-500 mt-2 text-left">
-                        1. URLをコピー<br>
-                        2. SafariまたはChromeを開く<br>
-                        3. アドレスバーに貼り付けて移動
-                    </div>
+                    <div class="text-[10px] text-gray-500 mt-2 text-left">1. URLをコピー<br>2. SafariまたはChromeを開く<br>3. アドレスバーに貼り付けて移動</div>
                 </div>
-                
-                <!-- Step 2: アプリの使い方 -->
+                <!-- Step 2 -->
                 <div class="tutorial-step hidden" data-step="2">
                     <div class="mb-4 text-indigo-500 text-5xl"><i class="fa-solid fa-sliders"></i></div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">基本操作</h3>
@@ -239,8 +231,7 @@
                         <p><i class="fa-solid fa-arrows-left-right text-gray-400 w-5"></i> <strong>スワイプ</strong>: 拡大中にアカウント切替</p>
                     </div>
                 </div>
-
-                <!-- Step 3: ブックマーク推奨 -->
+                <!-- Step 3 -->
                 <div class="tutorial-step hidden" data-step="3">
                     <div class="mb-4 text-yellow-500 text-5xl"><i class="fa-solid fa-bookmark"></i></div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">ブックマークしよう</h3>
@@ -248,7 +239,6 @@
                     <p class="text-xs text-gray-400 border-t pt-2 border-gray-100">※このチュートリアルは設定の「共通」タブから<br>いつでも見返せます。</p>
                 </div>
             </div>
-            
             <div class="bg-gray-50 p-4 border-t border-gray-100">
                 <div class="flex justify-center space-x-2 mb-4">
                     <span class="dot w-2 h-2 rounded-full bg-indigo-600 transition-colors" id="dot-1"></span>
@@ -273,16 +263,13 @@
                 <h2 class="font-bold text-gray-700">設定</h2>
                 <button onclick="closeSettings()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
-            <!-- 設定内のタブ切り替え -->
             <div class="flex border-b bg-white overflow-x-auto scrollbar-hide items-end px-1 pt-2 gap-1">
                 <button onclick="switchSettingsTab('account1')" id="set-tab-account1" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center rounded-t-lg transition-all">Account 1</button>
                 <button onclick="switchSettingsTab('account2')" id="set-tab-account2" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center rounded-t-lg transition-all">Account 2</button>
                 <button onclick="switchSettingsTab('portfolio')" id="set-tab-portfolio" class="flex-1 min-w-[70px] py-3 text-xs font-bold text-center rounded-t-lg transition-all">Portfolio</button>
                 <button onclick="switchSettingsTab('common')" id="set-tab-common" class="flex-1 min-w-[50px] py-3 text-xs font-bold text-center rounded-t-lg transition-all bg-gray-200 text-gray-600">共通</button>
             </div>
-            <div class="flex-1 overflow-y-auto p-4 bg-gray-50" id="settings-content-wrapper">
-                <!-- コンテンツはJSで注入 -->
-            </div>
+            <div class="flex-1 overflow-y-auto p-4 bg-gray-50" id="settings-content-wrapper"></div>
             <div class="p-4 border-t bg-white rounded-b-2xl shadow-inner z-10">
                 <button onclick="saveAndRegenerate()" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-indigo-700 transform active:scale-95 transition flex justify-center items-center"><i class="fa-solid fa-check mr-2"></i> 保存して更新</button>
             </div>
@@ -333,14 +320,8 @@
             <div id="focus-icon-container" class="mb-4"></div>
             <h2 id="focus-name" class="text-lg font-bold text-gray-800 mb-2 leading-tight line-clamp-2"></h2>
             <div id="focus-label-container" class="flex items-center justify-center text-gray-500 mb-6 text-xs font-bold uppercase tracking-widest"></div>
-            
             <div id="focus-qr-target" class="qr-code-container bg-white p-2 rounded-xl shadow-inner border border-gray-100 mb-4" onclick="openCurrentLink()"></div>
-            
-            <!-- リンクを開くボタン -->
-            <button onclick="openCurrentLink()" class="mb-3 bg-indigo-600 text-white text-sm font-bold py-2 px-6 rounded-full shadow-md hover:bg-indigo-700 transition transform active:scale-95 flex items-center">
-                <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> リンクを開く
-            </button>
-
+            <button onclick="openCurrentLink()" class="mb-3 bg-indigo-600 text-white text-sm font-bold py-2 px-6 rounded-full shadow-md hover:bg-indigo-700 transition transform active:scale-95 flex items-center"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> リンクを開く</button>
             <button onclick="closeFocus()" class="mt-1 text-gray-400 text-sm hover:text-gray-600"><i class="fa-solid fa-xmark mr-1"></i> 閉じる (上スワイプ)</button>
         </div>
         <div id="focus-bottom-nav" class="bottom-nav" onclick="event.stopPropagation()"></div>
@@ -350,6 +331,8 @@
         const STORAGE_KEY = 'chiikuji_meishi_release_v2';
         const TUTORIAL_KEY = 'chiikuji_meishi_tutorial_done_v2'; 
         const DEFAULT_ICON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=";
+        // X (Twitter) Icon Base64
+        const X_ICON_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiBzdHlsZT0iYmFja2dyb3VuZC1jb2xvcjpibGFjazsiPjxwYXRoIGZpbGw9IndoaXRlIiBkPSJNMzg5LjIgNDhoNzAuNkwzMDUuNiAyMjQuMiA0ODcgNDY0SDM0NUwyMzMuNyAzMTguNiAxMDYuNSA0NjRIMzUuOEwyMDAuNyAyNzUuNSAyNi44IDQ4SDE3Mi40TDI3Mi45IDE4MC45IDM4OS4yIDQ4ek0zNjQuNCA0MjEuOGgzOS4xTDE1MS4xIDg4aC00MkwzNjQuNCA0MjEuOHoiLz48L3N2Zz4=";
         
         const accountPlatformKeys = ['youtube1', 'youtube2', 'instagram', 'x', 'tiktok', 'facebook', 'homepage', 'blog'];
         const portfolioKeys = ['pf_home1', 'pf_home2', 'pf_home3'];
@@ -381,7 +364,6 @@
         let mainTouchStartX = 0, mainTouchStartY = 0;
         let tutorialCurrentStep = 1;
 
-        // DOM Elements
         const focusContainer = document.getElementById('focus-view-container');
         const focusCardEl = document.getElementById('focus-card');
         const focusNameEl = document.getElementById('focus-name');
@@ -389,7 +371,6 @@
         const focusLabelContainer = document.getElementById('focus-label-container');
         const focusQrTarget = document.getElementById('focus-qr-target');
         const focusBottomNav = document.getElementById('focus-bottom-nav');
-        
         const modal = document.getElementById('settings-modal');
         const listContainer = document.getElementById('qr-list');
         const emptyState = document.getElementById('empty-state');
@@ -398,23 +379,18 @@
         const appHeader = document.getElementById('app-header');
         const appTitle = document.getElementById('app-title');
         const headerSettingsBtn = document.getElementById('header-settings-btn');
-        
         const bookmarkGuideModal = document.getElementById('bookmark-guide-modal');
         const tutorialModal = document.getElementById('tutorial-modal');
+        const pwaGuideModal = document.getElementById('pwa-guide-modal');
 
         window.addEventListener('load', () => {
             loadData();
-            // アドレスバーURL取得とセット
             initUrlInputs();
-
-            if (!localStorage.getItem(TUTORIAL_KEY)) {
-                setTimeout(() => { openTutorial(); }, 500);
-            } else if (sessionStorage.getItem('open_pwa_guide_after_reload')) {
-                sessionStorage.removeItem('open_pwa_guide_after_reload');
-                setTimeout(() => { showAddToHomeGuide(); }, 500);
-            }
+            if (!localStorage.getItem(TUTORIAL_KEY)) { setTimeout(() => { openTutorial(); }, 500); } 
+            else if (sessionStorage.getItem('open_pwa_guide_after_reload')) { sessionStorage.removeItem('open_pwa_guide_after_reload'); setTimeout(() => { showAddToHomeGuide(); }, 500); }
             
             document.addEventListener('touchstart', handleMainTouchStart, {passive: false});
+            document.addEventListener('touchmove', handleMainTouchMove, {passive: false}); // 追加
             document.addEventListener('touchend', handleMainTouchEnd);
             focusContainer.addEventListener('touchstart', handleTouchStart, {passive: true});
             focusContainer.addEventListener('touchend', handleTouchEnd);
@@ -423,25 +399,15 @@
         function initUrlInputs() {
             const currentUrl = window.location.href.split('#')[0];
             const ids = ['tut-copy-url', 'copy-pwa-url-input', 'copy-url-input'];
-            ids.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.value = currentUrl;
-            });
+            ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = currentUrl; });
         }
 
-        // --- Link Open Logic ---
         function openCurrentLink() {
-            const data = appData[currentTab];
-            const item = data[currentFocusKey];
-            if (item && item.url) {
-                window.open(item.url, '_blank');
-            }
+            const data = appData[currentTab]; const item = data[currentFocusKey]; if (item && item.url) window.open(item.url, '_blank');
         }
 
-        // --- Tutorial Logic ---
         function nextTutorialStep() {
-            const currentStepEl = document.querySelector(`.tutorial-step[data-step="${tutorialCurrentStep}"]`);
-            currentStepEl.classList.add('hidden');
+            document.querySelector(`.tutorial-step[data-step="${tutorialCurrentStep}"]`).classList.add('hidden');
             document.getElementById(`dot-${tutorialCurrentStep}`).classList.replace('bg-indigo-600', 'bg-gray-300');
             tutorialCurrentStep++;
             const nextStepEl = document.querySelector(`.tutorial-step[data-step="${tutorialCurrentStep}"]`);
@@ -452,19 +418,16 @@
                     document.getElementById('tutorial-next-btn').classList.add('hidden');
                     document.getElementById('tutorial-close-btn').classList.remove('hidden');
                 }
-            } else {
-                closeTutorial();
-            }
+            } else { closeTutorial(); }
         }
 
         function closeTutorial() {
-            const dontShow = document.getElementById('tutorial-dont-show').checked;
-            if (dontShow) localStorage.setItem(TUTORIAL_KEY, 'true');
+            if (document.getElementById('tutorial-dont-show').checked) localStorage.setItem(TUTORIAL_KEY, 'true');
             tutorialModal.classList.add('hidden');
         }
 
         function openTutorial() {
-            initUrlInputs();
+            document.getElementById('tut-copy-url').value = window.location.href.split('#')[0];
             tutorialCurrentStep = 1;
             document.querySelectorAll('.tutorial-step').forEach(el => el.classList.add('hidden'));
             document.querySelector('.tutorial-step[data-step="1"]').classList.remove('hidden');
@@ -478,99 +441,57 @@
         }
         
         function copyUrlFromTutorial() {
-            const input = document.getElementById('tut-copy-url');
-            input.select();
-            document.execCommand('copy');
-            const msg = document.getElementById('tut-copy-msg');
-            msg.classList.remove('hidden');
-            setTimeout(() => msg.classList.add('hidden'), 2000);
+            const input = document.getElementById('tut-copy-url'); input.select(); document.execCommand('copy');
+            const msg = document.getElementById('tut-copy-msg'); msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), 2000);
         }
 
-        // --- Tab Logic ---
         function switchTab(tabName) {
-            currentTab = tabName;
-            window.scrollTo(0, 0);
-            updateTabUI();
-            renderList();
-            const theme = appData[currentTab]?.config?.themeColor || '#f8f9fa';
-            applyTheme(theme);
+            currentTab = tabName; window.scrollTo(0, 0); updateTabUI(); renderList();
+            applyTheme(appData[currentTab]?.config?.themeColor || '#f8f9fa');
         }
 
         function updateTabUI() {
             const tabs = ['account1', 'account2', 'portfolio'];
             tabs.forEach(t => {
-                const btn = document.getElementById(`tab-btn-${t}`);
-                if(!btn) return;
+                const btn = document.getElementById(`tab-btn-${t}`); if(!btn) return;
                 const name = appData[t]?.config?.tabName || (t.charAt(0).toUpperCase() + t.slice(1));
                 const theme = appData[t]?.config?.themeColor || '#f8f9fa';
                 btn.textContent = name;
-                
                 btn.style.backgroundColor = theme;
                 btn.style.color = isDarkColor(theme) ? 'white' : '#374151';
-                
-                if (currentTab === t) {
-                    btn.style.opacity = '1';
-                    btn.style.borderBottom = '4px solid rgba(0,0,0,0.2)';
-                } else {
-                    btn.style.opacity = '0.5';
-                    btn.style.borderBottom = 'none';
-                }
+                if (currentTab === t) { btn.style.opacity = '1'; btn.style.borderBottom = '4px solid rgba(0,0,0,0.2)'; } 
+                else { btn.style.opacity = '0.5'; btn.style.borderBottom = 'none'; }
             });
         }
 
         function cycleTab(direction) {
             const tabs = ['account1', 'account2', 'portfolio'];
-            let idx = tabs.indexOf(currentTab);
-            if(idx === -1) return;
+            let idx = tabs.indexOf(currentTab); if(idx === -1) return;
             if (direction === 'next') idx = (idx + 1) % tabs.length;
             else idx = (idx - 1 + tabs.length) % tabs.length;
             switchTab(tabs[idx]);
         }
 
-        function getCurrentKeys() {
-            return currentTab === 'portfolio' ? portfolioKeys : accountPlatformKeys;
-        }
+        function getCurrentKeys() { return currentTab === 'portfolio' ? portfolioKeys : accountPlatformKeys; }
 
-        // --- Settings Logic ---
         function switchSettingsTab(tabName) {
-            if (!modal.classList.contains('hidden') && currentSettingsTab !== 'common') {
-                saveTempFormData(currentSettingsTab);
-            }
-            currentSettingsTab = tabName;
-            updateSettingsTabUI();
-            
-            if(tabName === 'common') {
-                renderCommonSettings();
-            } else {
-                renderSettingsForm(tabName);
-            }
+            if (!modal.classList.contains('hidden') && currentSettingsTab !== 'common') saveTempFormData(currentSettingsTab);
+            currentSettingsTab = tabName; updateSettingsTabUI();
+            if(tabName === 'common') renderCommonSettings(); else renderSettingsForm(tabName);
         }
 
         function updateSettingsTabUI() {
             const tabs = ['account1', 'account2', 'portfolio', 'common'];
             tabs.forEach(t => {
-                const btn = document.getElementById(`set-tab-${t}`);
-                if(!btn) return;
+                const btn = document.getElementById(`set-tab-${t}`); if(!btn) return;
                 const active = currentSettingsTab === t;
-                
-                btn.style = ""; // Reset
-                btn.className = "flex-1 min-w-[50px] py-3 text-xs font-bold text-center px-1 rounded-t-lg transition-all duration-200 border-b-4";
-
-                if(t === 'common') {
-                    btn.className += active ? " border-gray-400 bg-gray-200 text-gray-700" : " border-transparent text-gray-400 hover:bg-gray-50";
-                } else {
+                btn.style = ""; btn.className = "flex-1 min-w-[50px] py-3 text-xs font-bold text-center px-1 rounded-t-lg transition-all duration-200 border-b-4";
+                if(t === 'common') { btn.className += active ? " border-gray-400 bg-gray-200 text-gray-700" : " border-transparent text-gray-400 hover:bg-gray-50"; } 
+                else {
                     const theme = appData[t]?.config?.themeColor || '#f8f9fa';
                     btn.style.backgroundColor = theme;
-                    
-                    if (active) {
-                        btn.style.opacity = '1';
-                        btn.style.borderColor = 'rgba(0,0,0,0.2)';
-                        btn.style.color = isDarkColor(theme) ? 'white' : '#374151';
-                    } else {
-                        btn.style.opacity = '0.6';
-                        btn.style.borderColor = 'transparent';
-                        btn.style.color = isDarkColor(theme) ? 'rgba(255,255,255,0.8)' : 'rgba(55,65,81,0.8)';
-                    }
+                    if (active) { btn.style.opacity = '1'; btn.style.borderColor = 'rgba(0,0,0,0.2)'; btn.style.color = isDarkColor(theme) ? 'white' : '#374151'; } 
+                    else { btn.style.opacity = '0.6'; btn.style.borderColor = 'transparent'; btn.style.color = isDarkColor(theme) ? 'rgba(255,255,255,0.8)' : 'rgba(55,65,81,0.8)'; }
                     const name = appData[t]?.config?.tabName || (t.charAt(0).toUpperCase() + t.slice(1));
                     btn.textContent = name;
                 }
@@ -580,19 +501,16 @@
         function openSettings() {
             currentSettingsTab = (currentTab === 'common') ? 'account1' : currentTab;
             updateSettingsTabUI();
-            if(currentSettingsTab === 'common') renderCommonSettings();
-            else renderSettingsForm(currentSettingsTab);
+            if(currentSettingsTab === 'common') renderCommonSettings(); else renderSettingsForm(currentSettingsTab);
             modal.classList.remove('hidden');
         }
 
-        // --- Render Functions ---
         function renderList() {
             listContainer.innerHTML = '';
             const keys = getCurrentKeys();
             let activeCount = 0;
             keys.forEach(key => {
-                const data = appData[currentTab];
-                if(!data) return;
+                const data = appData[currentTab]; if(!data) return;
                 const item = data[key] || {};
                 const url = item.url;
                 if (url) {
@@ -601,10 +519,11 @@
                     const cardColor = item.cardBgColor || '#ffffff';
                     const textColorClass = isDarkColor(cardColor) ? 'text-content-white' : '';
                     
-                    // X (Twitter) Icon Logic
+                    // X Icon Logic
                     const isX = key === 'x';
-                    const badgeBg = isX ? 'bg-black' : 'bg-white';
-                    const badgeColor = isX ? 'text-white' : config.color;
+                    const badgeIconHtml = isX 
+                        ? `<img src="${X_ICON_BASE64}" class="platform-badge-img">` 
+                        : `<div class="absolute -bottom-2 -right-4 bg-white rounded-full p-1 shadow-sm border border-gray-100 z-10"><i class="${config.icon} ${config.color} text-xl w-7 h-7 flex items-center justify-center"></i></div>`;
 
                     const itemHtml = `
                         <div id="card-${key}" class="card-item rounded-xl shadow-sm p-2 flex items-center space-x-3 cursor-pointer border border-white/50 ${textColorClass}" 
@@ -612,9 +531,7 @@
                             <div class="relative flex-shrink-0">
                                 <img id="icon-${key}" src="${item.image || ''}" class="list-icon ${item.image ? '' : 'hidden'} bg-gray-50">
                                 <div id="no-icon-${key}" class="list-icon ${item.image ? 'hidden' : ''} bg-gray-50 flex items-center justify-center text-gray-300 text-2xl"><i class="fa-solid fa-user"></i></div>
-                                <div class="absolute -bottom-2 -right-4 ${badgeBg} rounded-full p-1 shadow-sm border border-gray-100 z-10">
-                                    <i class="${config.icon} ${badgeColor} text-xl w-7 h-7 flex items-center justify-center"></i>
-                                </div>
+                                ${badgeIconHtml}
                             </div>
                             <div class="flex-1 min-w-0 pl-2">
                                 <div id="display-name-${key}" class="font-bold text-base truncate leading-tight">${item.name || config.label}</div>
@@ -628,14 +545,15 @@
             else { listContainer.classList.remove('hidden'); emptyState.classList.add('hidden'); }
         }
 
-        // --- Common Settings Render ---
         function renderCommonSettings() {
-            // 共通設定タブの中身生成時に、ボタン追加
             settingsContent.innerHTML = `
                 <div class="space-y-6 pb-12">
-                    <!-- ...省略 (アイコン設定等はそのまま) ... -->
                     <div class="bg-white rounded-2xl shadow-sm p-5 border border-indigo-100">
-                        <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4 border-b pb-2">ホーム画面用アイコン</h3>
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider">アプリ設定</h3>
+                            <button onclick="openTutorial()" class="text-xs text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-circle-question mr-1"></i>チュートリアルを見る</button>
+                        </div>
+                        <h4 class="text-xs font-bold text-gray-600 mb-2">ホーム画面用アイコン</h4>
                         <div class="flex items-center space-x-4 mb-2">
                             <img id="common-app-icon-preview" src="${appData.common?.appIcon || DEFAULT_ICON}" class="w-16 h-16 rounded-xl border border-gray-200 object-cover">
                             <div class="flex flex-col space-y-2">
@@ -649,27 +567,16 @@
                         <input type="hidden" id="setting-common-icon" value="${appData.common?.appIcon || ''}">
                         <p class="text-[10px] text-gray-400 mt-2">※ ここで設定した画像が、ホーム画面に追加した時のアイコンになります。</p>
                     </div>
-                    
-                    <!-- シェア -->
                     <div class="bg-white rounded-2xl shadow-sm p-6 text-center border border-gray-100">
                         <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4"><i class="fa-solid fa-share-nodes mr-2"></i>このアプリをシェア</h3>
                         <div class="bg-gray-50 p-4 rounded-xl inline-block mb-4 border border-gray-200"><div id="share-app-qr" class="qr-code-container"></div></div>
                         <p class="text-[10px] text-gray-400 mb-2">QRコードを読み取ると、現在開いているページを共有できます。</p>
                         <div class="text-[10px] text-gray-300 break-all px-4" id="current-url-display"></div>
                     </div>
-
-                    <!-- アクション (順番変更) -->
                     <div class="grid grid-cols-1 gap-3">
-                        <button onclick="showBookmarkGuide()" class="bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-indigo-700 flex items-center justify-center transform active:scale-95 transition">
-                            <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> ブラウザで開く / ブックマーク
-                        </button>
-                        <!-- 更新ボタン追加 -->
-                        <button onclick="reloadApp()" class="bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 flex items-center justify-center transform active:scale-95 transition">
-                            <i class="fa-solid fa-rotate mr-2"></i> アプリを更新 (リロード)
-                        </button>
+                        <button onclick="showBookmarkGuide()" class="bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-indigo-700 flex items-center justify-center transform active:scale-95 transition"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> ブラウザで開く / ブックマーク</button>
+                        <button onclick="reloadApp()" class="bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 flex items-center justify-center transform active:scale-95 transition"><i class="fa-solid fa-rotate mr-2"></i> アプリを更新 (リロード)</button>
                     </div>
-
-                    <!-- データ管理 -->
                     <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
                         <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">データ管理</h3>
                         <div class="grid grid-cols-2 gap-3">
@@ -681,41 +588,27 @@
             `;
             renderShareQR();
             if(appData.common?.appIcon) document.getElementById('btn-clear-common-icon').classList.remove('hidden');
-            
-            // URL入力欄初期化
             initUrlInputs();
         }
+        function reloadApp() { if(confirm("ページを再読み込みしますか？")) window.location.reload(); }
 
-        // リロード機能
-        function reloadApp() {
-            if(confirm("ページを再読み込みします。保存していない変更は破棄されますがよろしいですか？")) {
-                 window.location.reload();
-            }
-        }
-
-        // --- Account/Portfolio Settings Render ---
         function renderSettingsForm(tabName) {
             const keys = (tabName === 'portfolio') ? portfolioKeys : accountPlatformKeys;
             const tabConfig = appData[tabName].config || {};
-            
             let html = `
                 <div class="bg-white p-5 rounded-xl shadow-sm mb-6 border border-indigo-100">
                     <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4 border-b pb-2">基本設定</h3>
                     <div class="mb-5"><label class="block text-xs font-bold text-gray-600 mb-1">タブの名称</label><input type="text" id="setting-tab-name" value="${tabConfig.tabName || ''}" placeholder="例: 本垢, Portfolio" class="w-full text-sm p-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition"></div>
                     <div class="mb-5">
                         <label class="block text-xs font-bold text-gray-600 mb-2">アプリ全体のテーマカラー</label>
-                        <div class="flex flex-wrap gap-3 mb-2">
-                            ${renderColorBtn('#f8f9fa')}${renderColorBtn('#e0f2fe')}${renderColorBtn('#fce7f3')}${renderColorBtn('#ecfccb')}${renderColorBtn('#1f2937')}
-                        </div>
+                        <div class="flex flex-wrap gap-3 mb-2">${renderColorBtn('#f8f9fa')}${renderColorBtn('#e0f2fe')}${renderColorBtn('#fce7f3')}${renderColorBtn('#ecfccb')}${renderColorBtn('#1f2937')}</div>
                         <div class="flex items-center space-x-2"><input type="color" id="custom-theme-color" onchange="setThemeColor(this.value)" class="h-8 w-12 p-0 border rounded cursor-pointer"><span class="text-xs text-gray-500">カスタム色</span></div>
                         <input type="hidden" id="setting-theme-color" value="${tabConfig.themeColor || '#f8f9fa'}">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-2">背景画像</label>
                         <div class="flex items-center space-x-3">
-                            <div id="bg-preview-container" class="w-16 h-16 rounded-lg bg-gray-200 bg-cover bg-center border border-gray-300 relative overflow-hidden" style="${tabConfig.bgImage ? `background-image:url('${tabConfig.bgImage}')` : ''}">
-                                ${!tabConfig.bgImage ? '<div id="bg-no-image" class="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">なし</div>' : ''}
-                            </div>
+                            <div id="bg-preview-container" class="w-16 h-16 rounded-lg bg-gray-200 bg-cover bg-center border border-gray-300 relative overflow-hidden" style="${tabConfig.bgImage ? `background-image:url('${tabConfig.bgImage}')` : ''}">${!tabConfig.bgImage ? '<div id="bg-no-image" class="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">なし</div>' : ''}</div>
                             <div class="flex flex-col space-y-2">
                                 <label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center"><i class="fa-solid fa-image mr-1"></i> 選択<input type="file" accept="image/*" class="hidden" onchange="handleBgUpload(this)"></label>
                                 <button type="button" onclick="clearBg()" class="text-xs text-red-400 hover:text-red-600 ${!tabConfig.bgImage ? 'hidden' : ''}" id="btn-clear-bg"><i class="fa-solid fa-trash mr-1"></i>削除</button>
@@ -726,68 +619,52 @@
                 </div>
                 <div class="flex items-center justify-between mb-4 mt-6 px-1"><p class="text-xs text-gray-500 font-bold uppercase tracking-wider">リンク・色設定</p></div>
             `;
-
             keys.forEach((key, index) => {
                 const config = platformConfig[key];
                 const currentVal = appData[tabName][key] || { url: '', name: '', image: '', qrColor: config.defaultQrColor, cardBgColor: '#FFFFFF' };
                 let copyBtnHtml = (tabName !== 'portfolio' && index > 0) ? `<button type="button" onclick="copyProfileFromMain('${tabName}', '${key}')" class="text-xs text-indigo-600 font-bold hover:bg-indigo-50 px-2 py-1 rounded transition ml-auto border border-indigo-100"><i class="fa-regular fa-copy mr-1"></i>コピー</button>` : '';
-
-                html += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-100 relative">
-                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-50"><label class="block text-sm font-bold text-gray-700 flex items-center"><i class="${config.icon} ${config.color} mr-2 text-lg w-6 text-center"></i> ${config.label}</label>${copyBtnHtml}</div>
-                        <div class="space-y-4">
-                            <div class="flex items-center space-x-4">
-                                <div class="relative"><img id="preview-${tabName}-${key}" src="${currentVal.image || ''}" class="img-preview shadow-sm ${currentVal.image ? '' : 'hidden'}"><div id="no-preview-${tabName}-${key}" class="img-preview bg-gray-50 flex items-center justify-center text-gray-300 ${currentVal.image ? 'hidden' : ''}"><i class="fa-solid fa-user"></i></div></div>
-                                <div class="flex flex-col space-y-2"><label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center font-medium"><i class="fa-solid fa-camera mr-1"></i> 画像<input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(this, '${tabName}', '${key}')"></label><button type="button" onclick="clearImage('${tabName}', '${key}')" class="text-xs text-red-400 hover:text-red-600 ${currentVal.image ? '' : 'hidden'} text-left px-1" id="clear-${tabName}-${key}"><i class="fa-solid fa-trash mr-1"></i>削除</button></div>
-                                <input type="hidden" id="img-data-${tabName}-${key}" value="${currentVal.image || ''}">
-                            </div>
-                            <div><label class="block text-[10px] font-bold text-gray-400 mb-1">表示名</label><input type="text" id="name-${tabName}-${key}" value="${currentVal.name || ''}" placeholder="表示名" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition font-medium text-gray-800"></div>
-                            <div><label class="block text-[10px] font-bold text-gray-400 mb-1">リンクURL</label><input type="url" id="input-${tabName}-${key}" value="${currentVal.url || ''}" placeholder="https://..." class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition text-gray-600"></div>
-                            <div class="flex items-center space-x-4 pt-2 border-t border-gray-50">
-                                <div class="flex flex-col"><label class="text-[10px] font-bold text-gray-400 mb-1">QR色</label><div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200"><input type="color" id="qr-color-${tabName}-${key}" value="${currentVal.qrColor || config.defaultQrColor || '#000000'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0"></div></div>
-                                <div class="flex flex-col"><label class="text-[10px] font-bold text-gray-400 mb-1">背景色</label><div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200"><input type="color" id="qr-bg-${tabName}-${key}" value="${currentVal.cardBgColor || '#FFFFFF'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0"></div></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                html += `<div class="bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-100 relative"><div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-50"><label class="block text-sm font-bold text-gray-700 flex items-center"><i class="${config.icon} ${config.color} mr-2 text-lg w-6 text-center"></i> ${config.label}</label>${copyBtnHtml}</div><div class="space-y-4"><div class="flex items-center space-x-4"><div class="relative"><img id="preview-${tabName}-${key}" src="${currentVal.image || ''}" class="img-preview shadow-sm ${currentVal.image ? '' : 'hidden'}"><div id="no-preview-${tabName}-${key}" class="img-preview bg-gray-50 flex items-center justify-center text-gray-300 ${currentVal.image ? 'hidden' : ''}"><i class="fa-solid fa-user"></i></div></div><div class="flex flex-col space-y-2"><label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center font-medium"><i class="fa-solid fa-camera mr-1"></i> 画像<input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(this, '${tabName}', '${key}')"></label><button type="button" onclick="clearImage('${tabName}', '${key}')" class="text-xs text-red-400 hover:text-red-600 ${currentVal.image ? '' : 'hidden'} text-left px-1" id="clear-${tabName}-${key}"><i class="fa-solid fa-trash mr-1"></i>削除</button></div><input type="hidden" id="img-data-${tabName}-${key}" value="${currentVal.image || ''}"></div><div><label class="block text-[10px] font-bold text-gray-400 mb-1">表示名</label><input type="text" id="name-${tabName}-${key}" value="${currentVal.name || ''}" placeholder="表示名" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition font-medium text-gray-800"></div><div><label class="block text-[10px] font-bold text-gray-400 mb-1">リンクURL</label><input type="url" id="input-${tabName}-${key}" value="${currentVal.url || ''}" placeholder="https://..." class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition text-gray-600"></div><div class="flex items-center space-x-4 pt-2 border-t border-gray-50"><div class="flex flex-col"><label class="text-[10px] font-bold text-gray-400 mb-1">QR色</label><div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200"><input type="color" id="qr-color-${tabName}-${key}" value="${currentVal.qrColor || config.defaultQrColor || '#000000'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0"></div></div><div class="flex flex-col"><label class="text-[10px] font-bold text-gray-400 mb-1">背景色</label><div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200"><input type="color" id="qr-bg-${tabName}-${key}" value="${currentVal.cardBgColor || '#FFFFFF'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0"></div></div></div></div></div>`;
             });
             settingsContent.innerHTML = html;
             updateColorButtons(tabConfig.themeColor || '#f8f9fa');
         }
 
-        function renderColorBtn(color) {
-            return `<button onclick="setThemeColor('${color}')" class="color-btn" style="background-color: ${color};" title="${color}"></button>`;
-        }
-
-        function handleCommonIconUpload(input) {
-            processImage(input, 192, 0.9, (dataUrl) => {
-                document.getElementById('setting-common-icon').value = dataUrl;
-                document.getElementById('common-app-icon-preview').src = dataUrl;
-                document.getElementById('btn-clear-common-icon').classList.remove('hidden');
-                if(!appData.common) appData.common = {};
-                appData.common.appIcon = dataUrl;
-            });
-        }
+        function renderColorBtn(color) { return `<button onclick="setThemeColor('${color}')" class="color-btn" style="background-color: ${color};" title="${color}"></button>`; }
+        function handleCommonIconUpload(input) { processImage(input, 192, 0.9, (d) => { document.getElementById('setting-common-icon').value = d; document.getElementById('common-app-icon-preview').src = d; document.getElementById('btn-clear-common-icon').classList.remove('hidden'); if(!appData.common) appData.common = {}; appData.common.appIcon = d; }); }
+        function clearCommonIcon() { document.getElementById('setting-common-icon').value = ''; document.getElementById('common-app-icon-preview').src = DEFAULT_ICON; document.getElementById('btn-clear-common-icon').classList.add('hidden'); if(appData.common) appData.common.appIcon = ''; }
         
-        function clearCommonIcon() {
-            document.getElementById('setting-common-icon').value = '';
-            document.getElementById('common-app-icon-preview').src = DEFAULT_ICON;
-            document.getElementById('btn-clear-common-icon').classList.add('hidden');
-            if(appData.common) appData.common.appIcon = '';
-        }
-
+        // --- Main Touch Logic ---
         function handleMainTouchStart(e) {
             if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
             mainTouchStartX = e.touches[0].clientX; mainTouchStartY = e.touches[0].clientY;
         }
+
+        // スワイプ判定の強化
+        function handleMainTouchMove(e) {
+             if (!mainTouchStartX || !mainTouchStartY) return;
+             if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
+             
+             const diffX = e.touches[0].clientX - mainTouchStartX;
+             const diffY = e.touches[0].clientY - mainTouchStartY;
+             
+             // 横移動が縦移動より大きく、かつ一定量以上動いた場合、ブラウザのスクロール等をキャンセルしてスワイプとみなす
+             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+                 e.preventDefault();
+             }
+        }
+
         function handleMainTouchEnd(e) {
             if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
             const diffX = mainTouchStartX - e.changedTouches[0].clientX;
             const diffY = mainTouchStartY - e.changedTouches[0].clientY;
-            if (Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY)) {
+            
+            // 斜めスワイプも許容しつつ、横成分が十分大きいか判定
+            if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
                 cycleTab(diffX > 0 ? 'next' : 'prev');
             }
+            mainTouchStartX = 0; mainTouchStartY = 0;
         }
+        // ---
 
         function saveTempFormData(tabName) {
             if(tabName === 'common') return; 
@@ -811,109 +688,30 @@
                 };
             });
         }
-
-        function saveAndRegenerate() {
-            if(currentSettingsTab !== 'common') saveTempFormData(currentSettingsTab);
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-                updateAppIcons();
-                closeSettings();
-                switchTab(currentTab === 'common' ? 'account1' : currentTab);
-                alert("設定を保存しました。");
-            } catch (e) { alert('データ量が大きすぎます。'); console.error(e); }
-        }
-
-        function updateAppIcons() {
-            const icon = appData.common?.appIcon || DEFAULT_ICON;
-            document.getElementById('app-icon-apple').href = icon;
-            document.getElementById('app-icon-default').href = icon;
-        }
-
-        function loadData() {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                try {
-                    appData = JSON.parse(stored);
-                    ['account1', 'account2', 'portfolio'].forEach(t => { if(!appData[t]) appData[t] = {config:{}}; });
-                    if(!appData.common) appData.common = { appIcon: '' };
-                } catch(e) { console.error(e); }
-            }
-            updateTabUI();
-            switchTab('account1');
-            updateAppIcons();
-        }
-
-        function handleImageUpload(input, tabName, key) {
-            processImage(input, 150, 0.7, (dataUrl) => {
-                document.getElementById(`img-data-${tabName}-${key}`).value = dataUrl;
-                document.getElementById(`preview-${tabName}-${key}`).src = dataUrl;
-                document.getElementById(`preview-${tabName}-${key}`).classList.remove('hidden');
-                document.getElementById(`no-preview-${tabName}-${key}`).classList.add('hidden');
-                document.getElementById(`clear-${tabName}-${key}`).classList.remove('hidden');
-            });
-        }
-        function clearImage(tabName, key) {
-            document.getElementById(`img-data-${tabName}-${key}`).value = '';
-            document.getElementById(`preview-${tabName}-${key}`).classList.add('hidden');
-            document.getElementById(`no-preview-${tabName}-${key}`).classList.remove('hidden');
-            document.getElementById(`clear-${tabName}-${key}`).classList.add('hidden');
-        }
+        function saveAndRegenerate() { if(currentSettingsTab !== 'common') saveTempFormData(currentSettingsTab); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); updateAppIcons(); closeSettings(); switchTab(currentTab === 'common' ? 'account1' : currentTab); alert("設定を保存しました。"); } catch (e) { alert('データ量が大きすぎます。'); console.error(e); } }
+        function updateAppIcons() { const icon = appData.common?.appIcon || DEFAULT_ICON; document.getElementById('app-icon-apple').href = icon; document.getElementById('app-icon-default').href = icon; }
+        function loadData() { const stored = localStorage.getItem(STORAGE_KEY); if (stored) { try { appData = JSON.parse(stored); ['account1', 'account2', 'portfolio'].forEach(t => { if(!appData[t]) appData[t] = {config:{}}; }); if(!appData.common) appData.common = { appIcon: '' }; } catch(e) { console.error(e); } } updateTabUI(); switchTab('account1'); updateAppIcons(); }
+        function handleImageUpload(input, tabName, key) { processImage(input, 150, 0.7, (d) => { document.getElementById(`img-data-${tabName}-${key}`).value = d; document.getElementById(`preview-${tabName}-${key}`).src = d; document.getElementById(`preview-${tabName}-${key}`).classList.remove('hidden'); document.getElementById(`no-preview-${tabName}-${key}`).classList.add('hidden'); document.getElementById(`clear-${tabName}-${key}`).classList.remove('hidden'); }); }
+        function clearImage(tabName, key) { document.getElementById(`img-data-${tabName}-${key}`).value = ''; document.getElementById(`preview-${tabName}-${key}`).classList.add('hidden'); document.getElementById(`no-preview-${tabName}-${key}`).classList.remove('hidden'); document.getElementById(`clear-${tabName}-${key}`).classList.add('hidden'); }
         function handleBgUpload(input) { processImage(input, 600, 0.6, (d) => { document.getElementById('setting-bg-data').value = d; document.getElementById('bg-preview-container').style.backgroundImage = `url('${d}')`; document.getElementById('bg-no-image').classList.add('hidden'); document.getElementById('btn-clear-bg').classList.remove('hidden'); }); }
         function clearBg() { document.getElementById('setting-bg-data').value = ''; document.getElementById('bg-preview-container').style.backgroundImage = ''; document.getElementById('bg-no-image').classList.remove('hidden'); document.getElementById('btn-clear-bg').classList.add('hidden'); }
         function processImage(input, m, q, cb) { const f = input.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { const i = new Image(); i.onload = () => { const c = document.createElement('canvas'); const ctx = c.getContext('2d'); let w = i.width, h = i.height; if(w>h){if(w>m){h*=m/w;w=m}}else{if(h>m){w*=m/h;h=m}} c.width=w;c.height=h;ctx.drawImage(i,0,0,w,h); cb(c.toDataURL('image/jpeg',q)); }; i.src = e.target.result; }; r.readAsDataURL(f); }
-        
         function closeSettings() { modal.classList.add('hidden'); }
-        function showAddToHomeGuide() { 
-            document.getElementById('copy-pwa-url-input').value = window.location.href.split('#')[0];
-            pwaGuideModal.classList.remove('hidden'); 
-        }
+        function showAddToHomeGuide() { document.getElementById('copy-pwa-url-input').value = window.location.href.split('#')[0]; pwaGuideModal.classList.remove('hidden'); }
         function closeAddToHomeGuide() { pwaGuideModal.classList.add('hidden'); }
-        
         function showBookmarkGuide() { document.getElementById('copy-url-input').value = window.location.href.split('#')[0]; bookmarkGuideModal.classList.remove('hidden'); }
         function closeBookmarkGuide() { bookmarkGuideModal.classList.add('hidden'); }
-        
         function copyCurrentUrl() { const i = document.getElementById('copy-url-input'); i.select(); document.execCommand('copy'); const m = document.getElementById('copy-message'); m.classList.remove('hidden'); setTimeout(() => m.classList.add('hidden'), 2000); }
         function copyPwaUrl() { const i = document.getElementById('copy-pwa-url-input'); i.select(); document.execCommand('copy'); const m = document.getElementById('copy-pwa-msg'); m.classList.remove('hidden'); setTimeout(() => m.classList.add('hidden'), 2000); }
-        
         function reloadAndShowPwaGuide() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); updateAppIcons(); sessionStorage.setItem('open_pwa_guide_after_reload', 'true'); location.reload(); }
-        
         function setThemeColor(c) { document.getElementById('setting-theme-color').value = c; updateColorButtons(c); }
-        function updateColorButtons(c) { 
-            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
-            const customInput = document.getElementById('custom-theme-color');
-            if(customInput) customInput.value = c;
-            document.querySelectorAll('.color-btn').forEach(b => { 
-                if(rgbToHex(b.style.backgroundColor)===c.toLowerCase() || b.style.backgroundColor===c) b.classList.add('selected'); 
-            }); 
-        }
+        function updateColorButtons(c) { document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected')); const customInput = document.getElementById('custom-theme-color'); if(customInput) customInput.value = c; document.querySelectorAll('.color-btn').forEach(b => { if(rgbToHex(b.style.backgroundColor)===c.toLowerCase() || b.style.backgroundColor===c) b.classList.add('selected'); }); }
         function rgbToHex(rgb) { if(!rgb)return ''; if(rgb.startsWith('#'))return rgb.toLowerCase(); const v = rgb.match(/\d+/g); if(!v)return rgb; return "#"+((1<<24)+(parseInt(v[0])<<16)+(parseInt(v[1])<<8)+parseInt(v[2])).toString(16).slice(1).toLowerCase(); }
-        function applyTheme(c) { 
-            appHeader.style.backgroundColor = c; 
-            document.body.style.backgroundColor = c; // Body background update
-            const d = isDarkColor(c);
-            const contentColor = d ? 'white' : '#374151';
-            appTitle.style.color = contentColor;
-            headerSettingsBtn.style.color = d ? 'rgba(255,255,255,0.8)' : 'rgba(156,163,175,1)';
-        }
+        function applyTheme(c) { appHeader.style.backgroundColor = c; document.body.style.backgroundColor = c; const d = isDarkColor(c); const contentColor = d ? 'white' : '#374151'; appTitle.style.color = contentColor; headerSettingsBtn.style.color = d ? 'rgba(255,255,255,0.8)' : 'rgba(156,163,175,1)'; }
         function isDarkColor(c) { const h = rgbToHex(c); if(!h)return false; const r=parseInt(h.substr(1,2),16),g=parseInt(h.substr(3,2),16),b=parseInt(h.substr(5,2),16); return ((r*299+g*587+b*114)/1000)<128; }
-        
         function exportData() { if(!modal.classList.contains('hidden') && currentSettingsTab!=='common') saveTempFormData(currentSettingsTab); const s = JSON.stringify(appData); const b = new Blob([s],{type:"application/json"}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `chiikuji_meishi_v2_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }
         function importData(i) { const f = i.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { try { const d = JSON.parse(e.target.result); if(confirm('データを上書きしますか？')) { appData = d; localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); alert('読み込みました。更新します。'); location.reload(); } } catch(err){ alert('エラー'); } }; r.readAsText(f); i.value = ''; }
-
-        function copyProfileFromMain(tabName, targetKey) {
-            const keys = (tabName === 'portfolio') ? portfolioKeys : accountPlatformKeys;
-            const mainKey = keys[0];
-            const nameInput = document.getElementById(`name-${tabName}-${mainKey}`);
-            const imgInput = document.getElementById(`img-data-${tabName}-${mainKey}`);
-            if(!nameInput || !imgInput) return;
-            document.getElementById(`name-${tabName}-${targetKey}`).value = nameInput.value;
-            document.getElementById(`img-data-${tabName}-${targetKey}`).value = imgInput.value;
-            const p = document.getElementById(`preview-${tabName}-${targetKey}`);
-            const np = document.getElementById(`no-preview-${tabName}-${targetKey}`);
-            const c = document.getElementById(`clear-${tabName}-${targetKey}`);
-            if(imgInput.value) { p.src = imgInput.value; p.classList.remove('hidden'); np.classList.add('hidden'); c.classList.remove('hidden'); }
-            else { p.classList.add('hidden'); np.classList.remove('hidden'); c.classList.add('hidden'); }
-        }
+        function copyProfileFromMain(tabName, targetKey) { const keys = (tabName === 'portfolio') ? portfolioKeys : accountPlatformKeys; const mainKey = keys[0]; const nameInput = document.getElementById(`name-${tabName}-${mainKey}`); const imgInput = document.getElementById(`img-data-${tabName}-${mainKey}`); if(!nameInput || !imgInput) return; document.getElementById(`name-${tabName}-${targetKey}`).value = nameInput.value; document.getElementById(`img-data-${tabName}-${targetKey}`).value = imgInput.value; const p = document.getElementById(`preview-${tabName}-${targetKey}`); const np = document.getElementById(`no-preview-${tabName}-${targetKey}`); const c = document.getElementById(`clear-${tabName}-${targetKey}`); if(imgInput.value) { p.src = imgInput.value; p.classList.remove('hidden'); np.classList.add('hidden'); c.classList.remove('hidden'); } else { p.classList.add('hidden'); np.classList.remove('hidden'); c.classList.add('hidden'); } }
 
         function focusCard(key) { currentFocusKey = key; updateFocusContent(key, 'in'); focusContainer.classList.add('active'); }
         function updateFocusContent(key, animType) {
@@ -922,9 +720,7 @@
             focusContainer.style.backgroundImage = tabConfig.bgImage ? `url('${tabConfig.bgImage}')` : '';
             const cardColor = item.cardBgColor || '#ffffff';
             focusCardEl.style.backgroundColor = cardColor;
-            
             if(isDarkColor(cardColor)) { focusCardEl.classList.add('text-content-white'); } else { focusCardEl.classList.remove('text-content-white'); }
-
             focusCardEl.className = `meishi-card ${isDarkColor(cardColor) ? 'text-content-white' : ''}`;
             void focusCardEl.offsetWidth;
             if(animType) focusCardEl.classList.add(animType === 'next' ? 'anim-slide-in-right' : animType === 'prev' ? 'anim-slide-in-left' : 'anim-slide-down-in');
@@ -947,10 +743,11 @@
                 
                 // X (Twitter) Badge Logic
                 const isX = k === 'x';
-                const badgeBg = isX ? 'bg-black' : 'bg-white';
-                const badgeColor = isX ? 'text-white' : navConfig.color;
-
-                navHtml += `<div class="nav-item-wrapper ${isActive}" onclick="event.stopPropagation(); switchTo('${k}')">${navIcon}<div class="platform-badge ${badgeBg} ${navConfig.badgeClass}"><i class="${navConfig.icon} ${badgeColor}"></i></div></div>`;
+                const badgeIconHtml = isX 
+                    ? `<img src="${X_ICON_BASE64}" class="platform-badge-img">`
+                    : `<div class="platform-badge ${navConfig.badgeBg} ${navConfig.badgeClass}"><i class="${navConfig.icon}"></i></div>`;
+                
+                navHtml += `<div class="nav-item-wrapper ${isActive}" onclick="event.stopPropagation(); switchTo('${k}')">${navIcon}${badgeIconHtml}</div>`;
             });
             focusBottomNav.innerHTML = navHtml;
         }
