@@ -8,15 +8,15 @@
     <meta name="apple-mobile-web-app-title" content="Chiikuji Meishi">
     <title>Chiikuji Meishi</title>
     
-    <!-- デフォルトアプリアイコン -->
-    <link rel="apple-touch-icon" id="app-icon-apple" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=">
-    <link rel="shortcut icon" id="app-icon-default" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=">
+    <!-- ホーム画面用アイコン（JSで生成してセットします） -->
+    <link rel="apple-touch-icon" id="app-icon-apple" href="">
+    <link rel="shortcut icon" id="app-icon-default" href="">
     
-    <!-- アイコン設定即時反映 -->
+    <!-- 設定即時反映スクリプト -->
     <script>
         (function() {
             try {
-                const STORAGE_KEY = 'chiikuji_meishi_release_v2';
+                const STORAGE_KEY = 'chiikuji_meishi_release_v3';
                 const stored = localStorage.getItem(STORAGE_KEY);
                 if (stored) {
                     const data = JSON.parse(stored);
@@ -43,17 +43,12 @@
             -webkit-tap-highlight-color: transparent;
             background-color: #f8f9fa; 
             min-height: 100vh;
-            /* スワイプ操作を優先させる設定 */
             overscroll-behavior-y: none;
-            touch-action: pan-y; 
+            touch-action: pan-y pinch-zoom;
         }
 
-        /* ヘッダーのスタイル調整 */
-        header {
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        /* タブボタンの基本スタイル */
+        header { transition: background-color 0.3s ease, color 0.3s ease; }
+        
         .tab-btn {
             transition: all 0.3s ease;
             border-top-left-radius: 8px;
@@ -61,7 +56,7 @@
             margin: 0 2px;
         }
 
-        /* --- 拡大ビュー --- */
+        /* 拡大ビュー */
         #focus-view-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 50;
             background-color: #ffffff; background-size: cover; background-position: center; background-repeat: no-repeat;
@@ -96,15 +91,8 @@
             width: 180px !important; height: 180px !important;
             margin: 0 auto; border-radius: 4px; background-color: white; padding: 4px; 
         }
-        
-        .qr-code-container {
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-        .qr-code-container:active {
-            transform: scale(0.95);
-            opacity: 0.8;
-        }
+        .qr-code-container { cursor: pointer; transition: transform 0.1s; }
+        .qr-code-container:active { transform: scale(0.95); opacity: 0.8; }
 
         .bottom-nav {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 110px;
@@ -136,9 +124,10 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); z-index: 10;
         }
-        /* Xアイコン用 (画像) */
+        
+        /* Xアイコン (画像) - さらに大きく調整 */
         .platform-badge-img {
-            position: absolute; bottom: -2px; right: -2px; width: 22px; height: 22px;
+            position: absolute; bottom: -2px; right: -2px; width: 32px; height: 32px; /* 28px -> 32px */
             border-radius: 50%;
             box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); z-index: 10;
             object-fit: cover;
@@ -152,13 +141,13 @@
         .hidden-card { display: none !important; }
         
         .list-icon { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        
         .focus-icon { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .img-preview { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb; background-color: #fff; }
 
-        .color-btn { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #e5e7eb; cursor: pointer; transition: transform 0.2s; }
+        /* カラーパレットボタン */
+        .color-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #e5e7eb; cursor: pointer; transition: transform 0.2s; }
         .color-btn:hover { transform: scale(1.1); }
-        .color-btn.selected { border-color: #4f46e5; transform: scale(1.1); box-shadow: 0 0 0 2px #c7d2fe; }
+        .color-btn.selected { border-color: #4f46e5; transform: scale(1.15); box-shadow: 0 0 0 2px #c7d2fe; }
 
         .text-content-white { color: white !important; }
         .text-content-white .text-gray-500 { color: rgba(255,255,255,0.7) !important; }
@@ -174,7 +163,13 @@
         .bg-black { background-color: #000000; }
         .bg-white { background-color: #ffffff; }
         .text-indigo-500 { color: #6366f1; }
-
+        .x-icon-text { font-family: sans-serif; font-weight: bold; line-height: 1; }
+        .highlight-target { animation: highlightPulse 1.5s ease-in-out infinite; border: 2px solid #4f46e5 !important; }
+        @keyframes highlightPulse {
+            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
     </style>
 </head>
 <body id="app-body" class="pb-20">
@@ -205,13 +200,34 @@
     <!-- チュートリアルモーダル -->
     <div id="tutorial-modal" class="hidden fixed inset-0 bg-black/90 z-[70] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden relative">
-            <div id="tutorial-steps" class="p-6 text-center min-h-[340px] flex flex-col justify-center items-center">
-                <!-- Step 1 -->
-                <div class="tutorial-step" data-step="1">
+            <div id="tutorial-steps" class="p-6 text-center min-h-[400px] flex flex-col justify-center items-center">
+                
+                <!-- Step 1: アイコン選択 (New) -->
+                <div class="tutorial-step w-full" data-step="1">
+                    <div class="mb-4 text-indigo-500 text-4xl"><i class="fa-solid fa-palette"></i></div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">アイコンの色を選ぶ</h3>
+                    <p class="text-xs text-gray-500 mb-6">アプリのテーマカラーとアイコンを<br>好きな色に設定しましょう。</p>
+                    
+                    <!-- カラーピッカー -->
+                    <div class="flex flex-wrap justify-center gap-4 mb-4">
+                        <button onclick="selectTutorialColor('#60A5FA')" class="color-btn transform hover:scale-110" style="background-color: #60A5FA;"></button> <!-- Blue -->
+                        <button onclick="selectTutorialColor('#F87171')" class="color-btn transform hover:scale-110" style="background-color: #F87171;"></button> <!-- Red -->
+                        <button onclick="selectTutorialColor('#FBBF24')" class="color-btn transform hover:scale-110" style="background-color: #FBBF24;"></button> <!-- Yellow -->
+                        <button onclick="selectTutorialColor('#34D399')" class="color-btn transform hover:scale-110" style="background-color: #34D399;"></button> <!-- Green -->
+                        <button onclick="selectTutorialColor('#F472B6')" class="color-btn transform hover:scale-110" style="background-color: #F472B6;"></button> <!-- Pink -->
+                        <button onclick="selectTutorialColor('#1F2937')" class="color-btn transform hover:scale-110" style="background-color: #1F2937;"></button> <!-- Black -->
+                    </div>
+                    <div id="tut-icon-preview" class="flex justify-center mt-4">
+                        <!-- ここにSVGアイコンがプレビュー表示されます -->
+                    </div>
+                </div>
+
+                <!-- Step 2: 警告と誘導 -->
+                <div class="tutorial-step hidden w-full" data-step="2">
                     <div class="mb-4 text-red-500 text-5xl animate-bounce"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">データ消失の注意</h3>
                     <p class="text-xs text-left text-gray-600 leading-relaxed bg-red-50 p-3 rounded-lg mb-4">
-                        アプリ内ブラウザ（LINEやTwitterなど）で見ている場合、<strong>データを登録しても消えてしまいます！</strong>
+                        アプリ内ブラウザ（LINEやQRリーダーなど）で見ている場合、<strong>データを登録しても消えてしまいます！</strong>
                     </p>
                     <p class="text-sm font-bold text-indigo-600 mb-2">まずはブラウザで開き直してください</p>
                     <div class="flex items-center gap-2 mb-2 w-full">
@@ -221,24 +237,16 @@
                     <p id="tut-copy-msg" class="text-[10px] text-green-600 h-4 hidden">コピーしました！</p>
                     <div class="text-[10px] text-gray-500 mt-2 text-left">1. URLをコピー<br>2. SafariまたはChromeを開く<br>3. アドレスバーに貼り付けて移動</div>
                 </div>
-                <!-- Step 2 -->
-                <div class="tutorial-step hidden" data-step="2">
-                    <div class="mb-4 text-indigo-500 text-5xl"><i class="fa-solid fa-sliders"></i></div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">基本操作</h3>
-                    <div class="text-sm text-gray-500 space-y-3 text-left px-2">
-                        <p><i class="fa-solid fa-gear text-gray-400 w-5"></i> <strong>設定</strong>: リンクやテーマカラーを編集</p>
-                        <p><i class="fa-solid fa-hand-pointer text-gray-400 w-5"></i> <strong>リスト</strong>: タップでQR拡大表示</p>
-                        <p><i class="fa-solid fa-arrows-left-right text-gray-400 w-5"></i> <strong>スワイプ</strong>: 拡大中にアカウント切替</p>
-                    </div>
-                </div>
-                <!-- Step 3 -->
-                <div class="tutorial-step hidden" data-step="3">
+
+                <!-- Step 3: ブックマーク推奨 -->
+                <div class="tutorial-step hidden w-full" data-step="3">
                     <div class="mb-4 text-yellow-500 text-5xl"><i class="fa-solid fa-bookmark"></i></div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">ブックマークしよう</h3>
                     <p class="text-sm text-gray-500 leading-relaxed mb-4">ブラウザで開いたら、すぐに<br><strong>ブックマーク</strong>か<strong>ホーム画面に追加</strong>を<br>行ってください。</p>
                     <p class="text-xs text-gray-400 border-t pt-2 border-gray-100">※このチュートリアルは設定の「共通」タブから<br>いつでも見返せます。</p>
                 </div>
             </div>
+            
             <div class="bg-gray-50 p-4 border-t border-gray-100">
                 <div class="flex justify-center space-x-2 mb-4">
                     <span class="dot w-2 h-2 rounded-full bg-indigo-600 transition-colors" id="dot-1"></span>
@@ -276,7 +284,7 @@
         </div>
     </div>
 
-    <!-- ホーム画面追加ガイドモーダル -->
+    <!-- ホーム画面追加ガイド / ブックマークガイド (省略なし) -->
     <div id="pwa-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeAddToHomeGuide()">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
             <button onclick="closeAddToHomeGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
@@ -299,7 +307,6 @@
         </div>
     </div>
 
-    <!-- ブックマークガイド -->
     <div id="bookmark-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeBookmarkGuide()">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
             <button onclick="closeBookmarkGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
@@ -317,7 +324,10 @@
     <!-- フォーカスビュー -->
     <div id="focus-view-container" onclick="closeFocus()">
         <div id="focus-card" class="meishi-card" onclick="event.stopPropagation()">
-            <div id="focus-icon-container" class="mb-4"></div>
+            <div class="relative w-full flex justify-center">
+                <div id="focus-icon-container" class="mb-4 relative"></div>
+                <button onclick="editCurrentItem()" class="absolute top-0 right-0 bg-white/90 text-gray-500 p-2 rounded-full shadow-sm hover:bg-indigo-50 transition transform hover:scale-110 border border-gray-200 z-10"><i class="fa-solid fa-pen text-xs"></i></button>
+            </div>
             <h2 id="focus-name" class="text-lg font-bold text-gray-800 mb-2 leading-tight line-clamp-2"></h2>
             <div id="focus-label-container" class="flex items-center justify-center text-gray-500 mb-6 text-xs font-bold uppercase tracking-widest"></div>
             <div id="focus-qr-target" class="qr-code-container bg-white p-2 rounded-xl shadow-inner border border-gray-100 mb-4" onclick="openCurrentLink()"></div>
@@ -328,10 +338,8 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'chiikuji_meishi_release_v2';
-        const TUTORIAL_KEY = 'chiikuji_meishi_tutorial_done_v2'; 
-        const DEFAULT_ICON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=";
-        // X (Twitter) Icon Base64
+        const STORAGE_KEY = 'chiikuji_meishi_release_v3';
+        const TUTORIAL_KEY = 'chiikuji_meishi_tutorial_done_v3';
         const X_ICON_BASE64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiBzdHlsZT0iYmFja2dyb3VuZC1jb2xvcjpibGFjazsiPjxwYXRoIGZpbGw9IndoaXRlIiBkPSJNMzg5LjIgNDhoNzAuNkwzMDUuNiAyMjQuMiA0ODcgNDY0SDM0NUwyMzMuNyAzMTguNiAxMDYuNSA0NjRIMzUuOEwyMDAuNyAyNzUuNSAyNi44IDQ4SDE3Mi40TDI3Mi45IDE4MC45IDM4OS4yIDQ4ek0zNjQuNCA0MjEuOGgzOS4xTDE1MS4xIDg4aC00MkwzNjQuNCA0MjEuOHoiLz48L3N2Zz4=";
         
         const accountPlatformKeys = ['youtube1', 'youtube2', 'instagram', 'x', 'tiktok', 'facebook', 'homepage', 'blog'];
@@ -363,6 +371,28 @@
         let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0, currentFocusKey = null;
         let mainTouchStartX = 0, mainTouchStartY = 0;
         let tutorialCurrentStep = 1;
+        let selectedTutorialColor = '#60A5FA'; // Default blue
+
+        // アイコン生成用SVGテンプレート
+        function generateIconSvg(color) {
+            return `data:image/svg+xml;base64,${btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <rect width="512" height="512" fill="${color}" rx="128" ry="128"/>
+                <g transform="translate(60, 160)">
+                    <rect x="40" y="0" width="320" height="220" rx="16" fill="rgba(255,255,255,0.4)" transform="rotate(-5 160 110)"/>
+                    <rect x="20" y="10" width="320" height="220" rx="16" fill="rgba(255,255,255,0.7)" transform="rotate(-2 160 110)"/>
+                    <rect x="0" y="20" width="320" height="220" rx="16" fill="white"/>
+                    <circle cx="90" cy="110" r="45" fill="#ccc"/>
+                    <path d="M90 160c-30 0-55 20-55 45h110c0-25-25-45-55-45z" fill="#ccc"/>
+                    <rect x="160" y="70" width="120" height="20" rx="5" fill="#ccc"/>
+                    <rect x="160" y="110" width="120" height="20" rx="5" fill="#ccc"/>
+                    <rect x="160" y="150" width="80" height="20" rx="5" fill="#ccc"/>
+                </g>
+            </svg>`.trim())}`;
+        }
+
+        // 初期アイコン設定
+        const INITIAL_ICON = generateIconSvg('#60A5FA');
 
         const focusContainer = document.getElementById('focus-view-container');
         const focusCardEl = document.getElementById('focus-card');
@@ -386,11 +416,16 @@
         window.addEventListener('load', () => {
             loadData();
             initUrlInputs();
-            if (!localStorage.getItem(TUTORIAL_KEY)) { setTimeout(() => { openTutorial(); }, 500); } 
-            else if (sessionStorage.getItem('open_pwa_guide_after_reload')) { sessionStorage.removeItem('open_pwa_guide_after_reload'); setTimeout(() => { showAddToHomeGuide(); }, 500); }
+            // チュートリアル関連
+            if (!localStorage.getItem(TUTORIAL_KEY)) { 
+                setTimeout(() => { openTutorial(); }, 500); 
+            } else if (sessionStorage.getItem('open_pwa_guide_after_reload')) { 
+                sessionStorage.removeItem('open_pwa_guide_after_reload'); 
+                setTimeout(() => { showAddToHomeGuide(); }, 500); 
+            }
             
             document.addEventListener('touchstart', handleMainTouchStart, {passive: false});
-            document.addEventListener('touchmove', handleMainTouchMove, {passive: false}); // 追加
+            document.addEventListener('touchmove', handleMainTouchMove, {passive: false});
             document.addEventListener('touchend', handleMainTouchEnd);
             focusContainer.addEventListener('touchstart', handleTouchStart, {passive: true});
             focusContainer.addEventListener('touchend', handleTouchEnd);
@@ -406,7 +441,53 @@
             const data = appData[currentTab]; const item = data[currentFocusKey]; if (item && item.url) window.open(item.url, '_blank');
         }
 
+        function editCurrentItem() {
+            const targetKey = currentFocusKey;
+            const targetTab = currentTab;
+            closeFocus();
+            setTimeout(() => {
+                currentSettingsTab = targetTab;
+                updateSettingsTabUI();
+                renderSettingsForm(targetTab);
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    const targetEl = document.getElementById(`setting-item-${targetKey}`);
+                    if (targetEl) {
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetEl.classList.add('highlight-target');
+                        setTimeout(() => targetEl.classList.remove('highlight-target'), 1500);
+                    }
+                }, 300);
+            }, 200);
+        }
+
+        // --- Tutorial Icon Selection ---
+        function selectTutorialColor(color) {
+            selectedTutorialColor = color;
+            const preview = document.getElementById('tut-icon-preview');
+            preview.innerHTML = `<img src="${generateIconSvg(color)}" class="w-24 h-24 shadow-lg rounded-2xl">`;
+        }
+
         function nextTutorialStep() {
+            if (tutorialCurrentStep === 1) {
+                // 選択した色を適用
+                const iconData = generateIconSvg(selectedTutorialColor);
+                if(!appData.common) appData.common = {};
+                appData.common.appIcon = iconData;
+                
+                // 各アカウントのテーマカラーも一括設定（ユーザーが楽なように）
+                ['account1', 'account2', 'portfolio'].forEach(tab => {
+                    if(!appData[tab]) appData[tab] = { config: {} };
+                    if(!appData[tab].config) appData[tab].config = {};
+                    appData[tab].config.themeColor = selectedTutorialColor; // 選択した色を薄くするなど調整しても良いが、まずはそのまま
+                });
+                
+                // 保存して反映
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+                updateAppIcons();
+                applyTheme(selectedTutorialColor);
+            }
+
             document.querySelector(`.tutorial-step[data-step="${tutorialCurrentStep}"]`).classList.add('hidden');
             document.getElementById(`dot-${tutorialCurrentStep}`).classList.replace('bg-indigo-600', 'bg-gray-300');
             tutorialCurrentStep++;
@@ -437,6 +518,10 @@
             document.getElementById('tutorial-next-btn').classList.remove('hidden');
             document.getElementById('tutorial-close-btn').classList.add('hidden');
             document.getElementById('tutorial-dont-show').checked = false;
+            
+            // プレビュー初期化
+            selectTutorialColor('#60A5FA');
+            
             tutorialModal.classList.remove('hidden');
         }
         
@@ -447,7 +532,8 @@
 
         function switchTab(tabName) {
             currentTab = tabName; window.scrollTo(0, 0); updateTabUI(); renderList();
-            applyTheme(appData[currentTab]?.config?.themeColor || '#f8f9fa');
+            const theme = appData[currentTab]?.config?.themeColor || '#f8f9fa';
+            applyTheme(theme);
         }
 
         function updateTabUI() {
@@ -519,7 +605,6 @@
                     const cardColor = item.cardBgColor || '#ffffff';
                     const textColorClass = isDarkColor(cardColor) ? 'text-content-white' : '';
                     
-                    // X Icon Logic
                     const isX = key === 'x';
                     const badgeIconHtml = isX 
                         ? `<img src="${X_ICON_BASE64}" class="platform-badge-img">` 
@@ -546,6 +631,7 @@
         }
 
         function renderCommonSettings() {
+            // アイコン設定部分をプリセット選択式に変更
             settingsContent.innerHTML = `
                 <div class="space-y-6 pb-12">
                     <div class="bg-white rounded-2xl shadow-sm p-5 border border-indigo-100">
@@ -554,29 +640,51 @@
                             <button onclick="openTutorial()" class="text-xs text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-circle-question mr-1"></i>チュートリアルを見る</button>
                         </div>
                         <h4 class="text-xs font-bold text-gray-600 mb-2">ホーム画面用アイコン</h4>
-                        <div class="flex items-center space-x-4 mb-2">
-                            <img id="common-app-icon-preview" src="${appData.common?.appIcon || DEFAULT_ICON}" class="w-16 h-16 rounded-xl border border-gray-200 object-cover">
-                            <div class="flex flex-col space-y-2">
-                                <label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center">
-                                    <i class="fa-solid fa-image mr-1"></i> 画像を選択
-                                    <input type="file" accept="image/*" class="hidden" onchange="handleCommonIconUpload(this)">
-                                </label>
-                                <button onclick="clearCommonIcon()" class="text-xs text-red-400 hover:text-red-600 hidden" id="btn-clear-common-icon"><i class="fa-solid fa-trash mr-1"></i>削除</button>
+                        
+                        <div class="flex items-center space-x-4 mb-4">
+                            <img id="common-app-icon-preview" src="${appData.common?.appIcon || INITIAL_ICON}" class="w-16 h-16 rounded-xl border border-gray-200 object-cover shadow-sm">
+                            <div class="flex-1">
+                                <p class="text-[10px] text-gray-400 mb-2">カラーを選択:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button onclick="setPresetIcon('#60A5FA')" class="color-btn" style="background-color:#60A5FA; width:28px; height:28px;"></button>
+                                    <button onclick="setPresetIcon('#F87171')" class="color-btn" style="background-color:#F87171; width:28px; height:28px;"></button>
+                                    <button onclick="setPresetIcon('#FBBF24')" class="color-btn" style="background-color:#FBBF24; width:28px; height:28px;"></button>
+                                    <button onclick="setPresetIcon('#34D399')" class="color-btn" style="background-color:#34D399; width:28px; height:28px;"></button>
+                                    <button onclick="setPresetIcon('#F472B6')" class="color-btn" style="background-color:#F472B6; width:28px; height:28px;"></button>
+                                    <button onclick="setPresetIcon('#1F2937')" class="color-btn" style="background-color:#1F2937; width:28px; height:28px;"></button>
+                                </div>
                             </div>
                         </div>
+                        
+                        <div class="border-t pt-3 border-dashed border-gray-200">
+                            <p class="text-[10px] text-gray-400 mb-2">または好きな画像をアップロード:</p>
+                            <div class="flex items-center gap-2">
+                                <label class="cursor-pointer bg-gray-50 border border-gray-300 hover:bg-gray-100 text-gray-600 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center flex-1">
+                                    <i class="fa-solid fa-upload mr-1"></i> 画像を選択
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleCommonIconUpload(this)">
+                                </label>
+                                <button onclick="clearCommonIcon()" class="text-xs text-red-400 hover:text-red-600 hidden px-2" id="btn-clear-common-icon">リセット</button>
+                            </div>
+                        </div>
+                        
                         <input type="hidden" id="setting-common-icon" value="${appData.common?.appIcon || ''}">
-                        <p class="text-[10px] text-gray-400 mt-2">※ ここで設定した画像が、ホーム画面に追加した時のアイコンになります。</p>
                     </div>
+                    
+                    <!-- シェア機能 (省略なし) -->
                     <div class="bg-white rounded-2xl shadow-sm p-6 text-center border border-gray-100">
                         <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4"><i class="fa-solid fa-share-nodes mr-2"></i>このアプリをシェア</h3>
                         <div class="bg-gray-50 p-4 rounded-xl inline-block mb-4 border border-gray-200"><div id="share-app-qr" class="qr-code-container"></div></div>
                         <p class="text-[10px] text-gray-400 mb-2">QRコードを読み取ると、現在開いているページを共有できます。</p>
                         <div class="text-[10px] text-gray-300 break-all px-4" id="current-url-display"></div>
                     </div>
+
+                    <!-- アクション -->
                     <div class="grid grid-cols-1 gap-3">
                         <button onclick="showBookmarkGuide()" class="bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-indigo-700 flex items-center justify-center transform active:scale-95 transition"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> ブラウザで開く / ブックマーク</button>
                         <button onclick="reloadApp()" class="bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 flex items-center justify-center transform active:scale-95 transition"><i class="fa-solid fa-rotate mr-2"></i> アプリを更新 (リロード)</button>
                     </div>
+
+                    <!-- データ管理 -->
                     <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
                         <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">データ管理</h3>
                         <div class="grid grid-cols-2 gap-3">
@@ -587,9 +695,25 @@
                 </div>
             `;
             renderShareQR();
-            if(appData.common?.appIcon) document.getElementById('btn-clear-common-icon').classList.remove('hidden');
+            // カスタムアイコンがあればリセットボタン表示
+            if(appData.common?.appIcon && appData.common.appIcon.length > 1000) {
+                 document.getElementById('btn-clear-common-icon').classList.remove('hidden');
+            }
             initUrlInputs();
         }
+
+        // プリセットアイコン設定
+        function setPresetIcon(color) {
+            const iconData = generateIconSvg(color);
+            document.getElementById('setting-common-icon').value = iconData;
+            document.getElementById('common-app-icon-preview').src = iconData;
+            document.getElementById('btn-clear-common-icon').classList.remove('hidden');
+            
+            // 即時反映用
+            if(!appData.common) appData.common = {};
+            appData.common.appIcon = iconData;
+        }
+
         function reloadApp() { if(confirm("ページを再読み込みしますか？")) window.location.reload(); }
 
         function renderSettingsForm(tabName) {
@@ -623,7 +747,7 @@
                 const config = platformConfig[key];
                 const currentVal = appData[tabName][key] || { url: '', name: '', image: '', qrColor: config.defaultQrColor, cardBgColor: '#FFFFFF' };
                 let copyBtnHtml = (tabName !== 'portfolio' && index > 0) ? `<button type="button" onclick="copyProfileFromMain('${tabName}', '${key}')" class="text-xs text-indigo-600 font-bold hover:bg-indigo-50 px-2 py-1 rounded transition ml-auto border border-indigo-100"><i class="fa-regular fa-copy mr-1"></i>コピー</button>` : '';
-                html += `<div class="bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-100 relative"><div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-50"><label class="block text-sm font-bold text-gray-700 flex items-center"><i class="${config.icon} ${config.color} mr-2 text-lg w-6 text-center"></i> ${config.label}</label>${copyBtnHtml}</div><div class="space-y-4"><div class="flex items-center space-x-4"><div class="relative"><img id="preview-${tabName}-${key}" src="${currentVal.image || ''}" class="img-preview shadow-sm ${currentVal.image ? '' : 'hidden'}"><div id="no-preview-${tabName}-${key}" class="img-preview bg-gray-50 flex items-center justify-center text-gray-300 ${currentVal.image ? 'hidden' : ''}"><i class="fa-solid fa-user"></i></div></div><div class="flex flex-col space-y-2"><label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center font-medium"><i class="fa-solid fa-camera mr-1"></i> 画像<input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(this, '${tabName}', '${key}')"></label><button type="button" onclick="clearImage('${tabName}', '${key}')" class="text-xs text-red-400 hover:text-red-600 ${currentVal.image ? '' : 'hidden'} text-left px-1" id="clear-${tabName}-${key}"><i class="fa-solid fa-trash mr-1"></i>削除</button></div><input type="hidden" id="img-data-${tabName}-${key}" value="${currentVal.image || ''}"></div><div><label class="block text-[10px] font-bold text-gray-400 mb-1">表示名</label><input type="text" id="name-${tabName}-${key}" value="${currentVal.name || ''}" placeholder="表示名" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition font-medium text-gray-800"></div><div><label class="block text-[10px] font-bold text-gray-400 mb-1">リンクURL</label><input type="url" id="input-${tabName}-${key}" value="${currentVal.url || ''}" placeholder="https://..." class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition text-gray-600"></div><div class="flex items-center space-x-4 pt-2 border-t border-gray-50"><div class="flex flex-col"><label class="text-[10px] font-bold text-gray-400 mb-1">QR色</label><div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200"><input type="color" id="qr-color-${tabName}-${key}" value="${currentVal.qrColor || config.defaultQrColor || '#000000'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0"></div></div><div class="flex flex-col"><label class="text-[10px] font-bold text-gray-400 mb-1">背景色</label><div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200"><input type="color" id="qr-bg-${tabName}-${key}" value="${currentVal.cardBgColor || '#FFFFFF'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0"></div></div></div></div></div>`;
+                html += `<div id="setting-item-${key}" class="bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-100 relative"><div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-50"><label class="block text-sm font-bold text-gray-700 flex items-center"><i class="${config.icon} ${config.color} mr-2 text-lg w-6 text-center"></i> ${config.label}</label>${copyBtnHtml}</div><div class="space-y-4"><div class="flex items-center space-x-4"><div class="relative"><img id="preview-${tabName}-${key}" src="${currentVal.image || ''}" class="img-preview shadow-sm ${currentVal.image ? '' : 'hidden'}"><div id="no-preview-${tabName}-${key}" class="img-preview bg-gray-50 flex items-center justify-center text-gray-300 ${currentVal.image ? 'hidden' : ''}"><i class="fa-solid fa-user"></i></div></div><div class="flex flex-col space-y-2"><label class="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs py-2 px-3 rounded-lg transition shadow-sm text-center font-medium"><i class="fa-solid fa-camera mr-1"></i> 画像<input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(this, '${tabName}', '${key}')"></label><button type="button" onclick="clearImage('${tabName}', '${key}')" class="text-xs text-red-400 hover:text-red-600 ${currentVal.image ? '' : 'hidden'} text-left px-1" id="clear-${tabName}-${key}"><i class="fa-solid fa-trash mr-1"></i>削除</button></div><input type="hidden" id="img-data-${tabName}-${key}" value="${currentVal.image || ''}"></div><div><label class="block text-[10px] font-bold text-gray-400 mb-1">表示名</label><input type="text" id="name-${tabName}-${key}" value="${currentVal.name || ''}" placeholder="表示名" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition font-medium text-gray-800"></div><div><label class="block text-[10px] font-bold text-gray-400 mb-1">リンクURL</label><input type="url" id="input-${tabName}-${key}" value="${currentVal.url || ''}" placeholder="https://..." class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition text-gray-600"></div><div class="flex items-center space-x-4 pt-2 border-t border-gray-50"><div class="flex flex-col"><label class="text-[10px] font-bold text-gray-400 mb-1">QR色</label><div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200"><input type="color" id="qr-color-${tabName}-${key}" value="${currentVal.qrColor || config.defaultQrColor || '#000000'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0"></div></div><div class="flex flex-col"><label class="text-[10px] font-bold text-gray-400 mb-1">背景色</label><div class="flex items-center bg-gray-50 p-1 rounded-lg border border-gray-200"><input type="color" id="qr-bg-${tabName}-${key}" value="${currentVal.cardBgColor || '#FFFFFF'}" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent p-0"></div></div></div></div></div>`;
             });
             settingsContent.innerHTML = html;
             updateColorButtons(tabConfig.themeColor || '#f8f9fa');
@@ -631,40 +755,26 @@
 
         function renderColorBtn(color) { return `<button onclick="setThemeColor('${color}')" class="color-btn" style="background-color: ${color};" title="${color}"></button>`; }
         function handleCommonIconUpload(input) { processImage(input, 192, 0.9, (d) => { document.getElementById('setting-common-icon').value = d; document.getElementById('common-app-icon-preview').src = d; document.getElementById('btn-clear-common-icon').classList.remove('hidden'); if(!appData.common) appData.common = {}; appData.common.appIcon = d; }); }
-        function clearCommonIcon() { document.getElementById('setting-common-icon').value = ''; document.getElementById('common-app-icon-preview').src = DEFAULT_ICON; document.getElementById('btn-clear-common-icon').classList.add('hidden'); if(appData.common) appData.common.appIcon = ''; }
+        function clearCommonIcon() { document.getElementById('setting-common-icon').value = ''; document.getElementById('common-app-icon-preview').src = INITIAL_ICON; document.getElementById('btn-clear-common-icon').classList.add('hidden'); if(appData.common) appData.common.appIcon = ''; }
         
-        // --- Main Touch Logic ---
         function handleMainTouchStart(e) {
             if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
             mainTouchStartX = e.touches[0].clientX; mainTouchStartY = e.touches[0].clientY;
         }
-
-        // スワイプ判定の強化
         function handleMainTouchMove(e) {
              if (!mainTouchStartX || !mainTouchStartY) return;
              if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
-             
              const diffX = e.touches[0].clientX - mainTouchStartX;
              const diffY = e.touches[0].clientY - mainTouchStartY;
-             
-             // 横移動が縦移動より大きく、かつ一定量以上動いた場合、ブラウザのスクロール等をキャンセルしてスワイプとみなす
-             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
-                 e.preventDefault();
-             }
+             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) { e.preventDefault(); }
         }
-
         function handleMainTouchEnd(e) {
             if (!modal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden') || !bookmarkGuideModal.classList.contains('hidden') || !tutorialModal.classList.contains('hidden') || focusContainer.classList.contains('active')) return;
             const diffX = mainTouchStartX - e.changedTouches[0].clientX;
             const diffY = mainTouchStartY - e.changedTouches[0].clientY;
-            
-            // 斜めスワイプも許容しつつ、横成分が十分大きいか判定
-            if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-                cycleTab(diffX > 0 ? 'next' : 'prev');
-            }
+            if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) { cycleTab(diffX > 0 ? 'next' : 'prev'); }
             mainTouchStartX = 0; mainTouchStartY = 0;
         }
-        // ---
 
         function saveTempFormData(tabName) {
             if(tabName === 'common') return; 
@@ -689,7 +799,7 @@
             });
         }
         function saveAndRegenerate() { if(currentSettingsTab !== 'common') saveTempFormData(currentSettingsTab); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); updateAppIcons(); closeSettings(); switchTab(currentTab === 'common' ? 'account1' : currentTab); alert("設定を保存しました。"); } catch (e) { alert('データ量が大きすぎます。'); console.error(e); } }
-        function updateAppIcons() { const icon = appData.common?.appIcon || DEFAULT_ICON; document.getElementById('app-icon-apple').href = icon; document.getElementById('app-icon-default').href = icon; }
+        function updateAppIcons() { const icon = appData.common?.appIcon || INITIAL_ICON; document.getElementById('app-icon-apple').href = icon; document.getElementById('app-icon-default').href = icon; }
         function loadData() { const stored = localStorage.getItem(STORAGE_KEY); if (stored) { try { appData = JSON.parse(stored); ['account1', 'account2', 'portfolio'].forEach(t => { if(!appData[t]) appData[t] = {config:{}}; }); if(!appData.common) appData.common = { appIcon: '' }; } catch(e) { console.error(e); } } updateTabUI(); switchTab('account1'); updateAppIcons(); }
         function handleImageUpload(input, tabName, key) { processImage(input, 150, 0.7, (d) => { document.getElementById(`img-data-${tabName}-${key}`).value = d; document.getElementById(`preview-${tabName}-${key}`).src = d; document.getElementById(`preview-${tabName}-${key}`).classList.remove('hidden'); document.getElementById(`no-preview-${tabName}-${key}`).classList.add('hidden'); document.getElementById(`clear-${tabName}-${key}`).classList.remove('hidden'); }); }
         function clearImage(tabName, key) { document.getElementById(`img-data-${tabName}-${key}`).value = ''; document.getElementById(`preview-${tabName}-${key}`).classList.add('hidden'); document.getElementById(`no-preview-${tabName}-${key}`).classList.remove('hidden'); document.getElementById(`clear-${tabName}-${key}`).classList.add('hidden'); }
