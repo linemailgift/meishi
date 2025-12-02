@@ -144,7 +144,9 @@
         .card-item:active { transform: scale(0.98); }
         .hidden-card { display: none !important; }
         
-        .list-icon { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        /* リストアイコン（顔写真）のサイズ調整: 60pxに拡大 */
+        .list-icon { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        
         .focus-icon { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .img-preview { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb; background-color: #fff; }
 
@@ -194,30 +196,54 @@
         <div id="qr-list" class="space-y-3 pb-8"></div>
     </main>
 
-    <!-- チュートリアルモーダル -->
-    <div id="tutorial-modal" class="hidden fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-4">
+    <!-- チュートリアルモーダル (初回・ブラウザ誘導重視) -->
+    <div id="tutorial-modal" class="hidden fixed inset-0 bg-black/90 z-[70] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden relative">
-            <div id="tutorial-steps" class="p-6 text-center min-h-[320px] flex flex-col justify-center items-center">
-                <!-- Step 1 -->
+            <div id="tutorial-steps" class="p-6 text-center min-h-[340px] flex flex-col justify-center items-center">
+                <!-- Step 1: 警告と誘導 -->
                 <div class="tutorial-step" data-step="1">
-                    <div class="mb-4 text-indigo-500 text-5xl"><i class="fa-solid fa-gear"></i></div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">まずは設定から</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed">右上の歯車ボタン <i class="fa-solid fa-gear text-xs"></i> をタップして、<br>あなたのSNSリンクやプロフィール画像、<br>テーマカラーを設定しましょう。</p>
+                    <div class="mb-4 text-red-500 text-5xl animate-bounce"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">データ消失の注意</h3>
+                    <p class="text-xs text-left text-gray-600 leading-relaxed bg-red-50 p-3 rounded-lg mb-4">
+                        アプリ内ブラウザ（LINEやTwitterなど）で見ている場合、<strong>データを登録しても消えてしまいます！</strong>
+                    </p>
+                    <p class="text-sm font-bold text-indigo-600 mb-2">まずはブラウザで開き直してください</p>
+                    
+                    <div class="flex items-center gap-2 mb-2 w-full">
+                        <input type="text" id="tut-copy-url" class="flex-1 bg-gray-100 border border-gray-300 text-xs p-2 rounded text-gray-500" readonly>
+                        <button onclick="copyUrlFromTutorial()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-indigo-700 whitespace-nowrap">
+                            <i class="fa-regular fa-copy mr-1"></i>コピー
+                        </button>
+                    </div>
+                    <p id="tut-copy-msg" class="text-[10px] text-green-600 h-4 hidden">コピーしました！</p>
+                    
+                    <div class="text-[10px] text-gray-500 mt-2 text-left">
+                        1. URLをコピー<br>
+                        2. SafariまたはChromeを開く<br>
+                        3. アドレスバーに貼り付けて移動
+                    </div>
                 </div>
-                <!-- Step 2 -->
+                
+                <!-- Step 2: アプリの使い方 -->
                 <div class="tutorial-step hidden" data-step="2">
-                    <div class="mb-4 text-pink-500 text-5xl"><i class="fa-solid fa-hand-pointer"></i></div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">タップして拡大</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed">リストをタップすると拡大表示されます。<br>拡大画面では<span class="font-bold text-indigo-500">左右スワイプ</span>で<br>他のSNSに素早く切り替えられます。</p>
+                    <div class="mb-4 text-indigo-500 text-5xl"><i class="fa-solid fa-sliders"></i></div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">基本操作</h3>
+                    <div class="text-sm text-gray-500 space-y-3 text-left px-2">
+                        <p><i class="fa-solid fa-gear text-gray-400 w-5"></i> <strong>設定</strong>: リンクやテーマカラーを編集</p>
+                        <p><i class="fa-solid fa-hand-pointer text-gray-400 w-5"></i> <strong>リスト</strong>: タップでQR拡大表示</p>
+                        <p><i class="fa-solid fa-arrows-left-right text-gray-400 w-5"></i> <strong>スワイプ</strong>: 拡大中にアカウント切替</p>
+                    </div>
                 </div>
-                <!-- Step 3 -->
+
+                <!-- Step 3: ブックマーク推奨 -->
                 <div class="tutorial-step hidden" data-step="3">
-                    <div class="mb-4 text-green-500 text-5xl"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">アプリとして使う</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed">設定の「共通」タブから<br>ホーム画面に追加したり、<br><strong>データのバックアップ</strong>もここから行えます。</p>
-                    <p class="text-xs text-gray-400 mt-4 border-t pt-2 border-gray-100">※チュートリアルは設定の「共通」タブから<br>いつでも見返せます。</p>
+                    <div class="mb-4 text-yellow-500 text-5xl"><i class="fa-solid fa-bookmark"></i></div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">ブックマークしよう</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed mb-4">ブラウザで開いたら、すぐに<br><strong>ブックマーク</strong>か<strong>ホーム画面に追加</strong>を<br>行ってください。</p>
+                    <p class="text-xs text-gray-400 border-t pt-2 border-gray-100">※このチュートリアルは設定の「共通」タブから<br>いつでも見返せます。</p>
                 </div>
             </div>
+            
             <div class="bg-gray-50 p-4 border-t border-gray-100">
                 <div class="flex justify-center space-x-2 mb-4">
                     <span class="dot w-2 h-2 rounded-full bg-indigo-600 transition-colors" id="dot-1"></span>
@@ -258,41 +284,7 @@
         </div>
     </div>
 
-    <!-- ホーム画面追加ガイドモーダル -->
-    <div id="pwa-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeAddToHomeGuide()">
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
-            <button onclick="closeAddToHomeGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
-            <div class="text-center mb-6"><i class="fa-solid fa-share-nodes text-4xl text-indigo-500 mb-3"></i><h3 class="text-lg font-bold text-gray-800">ホーム画面に追加</h3><p class="text-xs text-gray-500 mt-1">アイコン付きでアプリとして使えます</p></div>
-            
-            <div class="space-y-4 text-sm text-gray-600">
-                <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100">
-                    <p class="text-xs text-yellow-800 font-bold mb-2"><i class="fa-solid fa-circle-exclamation mr-1"></i> アプリモードで開いている場合</p>
-                    <p class="text-xs mb-3">この画面には共有ボタンがありません。<br>以下の手順でブラウザを開いてください。</p>
-                    
-                    <div class="flex items-center gap-2 mb-2">
-                        <input type="text" id="copy-pwa-url-input" class="w-full bg-white border border-gray-300 text-xs p-2 rounded text-gray-600" readonly>
-                        <button onclick="copyPwaUrl()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-indigo-700 whitespace-nowrap">コピー</button>
-                    </div>
-                    <p id="copy-pwa-msg" class="text-[10px] text-green-600 h-4 hidden text-center mb-2">コピーしました！</p>
-                    
-                    <ol class="list-decimal list-inside space-y-1 pl-1 text-xs">
-                        <li><strong>Safari/Chrome</strong>アプリを自分で開く</li>
-                        <li>アドレスバーにURLを貼り付けて開く</li>
-                        <li>その画面で「共有」→「ホーム画面に追加」</li>
-                    </ol>
-                </div>
-
-                <div class="border-t pt-4">
-                    <h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-apple text-lg mr-2"></i> iPhone (Safari)</h4>
-                    <p class="text-xs text-gray-500">ブラウザで開いている場合:</p>
-                    <ol class="list-decimal list-inside space-y-1 pl-1 text-xs"><li>画面下の共有ボタン <i class="fa-solid fa-arrow-up-from-bracket mx-1"></i> をタップ</li><li>メニューから「ホーム画面に追加」を選択</li></ol>
-                </div>
-            </div>
-            <div class="mt-6 text-center"><button onclick="closeAddToHomeGuide()" class="bg-gray-100 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200">閉じる</button></div>
-        </div>
-    </div>
-
-    <!-- ブックマークガイド -->
+    <!-- ブックマークガイド (汎用) -->
     <div id="bookmark-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeBookmarkGuide()">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
             <button onclick="closeBookmarkGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
@@ -302,7 +294,20 @@
                 <div class="flex items-center gap-2"><input type="text" id="copy-url-input" class="w-full bg-white border border-gray-300 text-xs p-2 rounded text-gray-600" readonly><button onclick="copyCurrentUrl()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-indigo-700 whitespace-nowrap">コピー</button></div>
                 <p id="copy-message" class="text-[10px] text-green-600 mt-1 h-4 hidden text-center">URLをコピーしました！</p>
             </div>
-            <div class="space-y-4 text-sm text-gray-600"><p class="text-xs bg-yellow-50 p-2 rounded text-yellow-800 border border-yellow-100"><i class="fa-solid fa-circle-info mr-1"></i>アプリモードでは直接ブラウザを開けません。<br><strong>URLをコピーして、SafariやChromeのアドレスバーに貼り付けて開いてください。</strong></p></div>
+            <div class="space-y-4 text-sm text-gray-600">
+                <div class="border-t pt-3">
+                    <h4 class="font-bold text-gray-800 mb-1"><i class="fa-brands fa-safari text-blue-500 mr-1"></i> Safari / Chromeで開く</h4>
+                    <ol class="list-decimal list-inside text-xs pl-1 space-y-1">
+                        <li>上の「コピー」ボタンを押す</li>
+                        <li>ブラウザアプリを開く</li>
+                        <li>アドレスバーに貼り付けて移動</li>
+                    </ol>
+                </div>
+                <div class="border-t pt-3">
+                    <h4 class="font-bold text-gray-800 mb-1"><i class="fa-solid fa-star text-yellow-500 mr-1"></i> ブックマーク / ホームに追加</h4>
+                    <p class="text-xs">ブラウザで開いた後、共有ボタン <i class="fa-solid fa-arrow-up-from-bracket"></i> やメニューから登録してください。</p>
+                </div>
+            </div>
             <div class="mt-6 text-center"><button onclick="closeBookmarkGuide()" class="bg-gray-100 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200">閉じる</button></div>
         </div>
     </div>
@@ -328,7 +333,7 @@
 
     <script>
         const STORAGE_KEY = 'chiikuji_meishi_release_v2';
-        const TUTORIAL_KEY = 'chiikuji_meishi_tutorial_done_v1';
+        const TUTORIAL_KEY = 'chiikuji_meishi_tutorial_done_v2'; // Key update to force tutorial
         const DEFAULT_ICON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAMAAACw7u9NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF3d3d////RlvuCAAAAAJ0Uk5T/wDltzBKAAAAPklEQVR42uzYQQ0AAAgDsezfNCZuJ2ARNL01bGlpGwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBgXcC804A8y61j0AAAAAASUVORK5CYII=";
         
         const accountPlatformKeys = ['youtube1', 'youtube2', 'instagram', 'x', 'tiktok', 'facebook', 'homepage', 'blog'];
@@ -379,17 +384,14 @@
         const appTitle = document.getElementById('app-title');
         const headerSettingsBtn = document.getElementById('header-settings-btn');
         
-        const pwaGuideModal = document.getElementById('pwa-guide-modal');
         const bookmarkGuideModal = document.getElementById('bookmark-guide-modal');
         const tutorialModal = document.getElementById('tutorial-modal');
 
         window.addEventListener('load', () => {
             loadData();
+            // チュートリアル強制表示 (Key更新済み)
             if (!localStorage.getItem(TUTORIAL_KEY)) {
-                setTimeout(() => { tutorialModal.classList.remove('hidden'); }, 500);
-            } else if (sessionStorage.getItem('open_pwa_guide_after_reload')) {
-                sessionStorage.removeItem('open_pwa_guide_after_reload');
-                setTimeout(() => { showAddToHomeGuide(); }, 500);
+                setTimeout(() => { openTutorial(); }, 500);
             }
             
             document.addEventListener('touchstart', handleMainTouchStart, {passive: false});
@@ -433,6 +435,9 @@
         }
 
         function openTutorial() {
+            // URLをセット
+            document.getElementById('tut-copy-url').value = window.location.href.split('#')[0];
+            
             tutorialCurrentStep = 1;
             document.querySelectorAll('.tutorial-step').forEach(el => el.classList.add('hidden'));
             document.querySelector('.tutorial-step[data-step="1"]').classList.remove('hidden');
@@ -443,6 +448,15 @@
             document.getElementById('tutorial-close-btn').classList.add('hidden');
             document.getElementById('tutorial-dont-show').checked = false;
             tutorialModal.classList.remove('hidden');
+        }
+        
+        function copyUrlFromTutorial() {
+            const input = document.getElementById('tut-copy-url');
+            input.select();
+            document.execCommand('copy');
+            const msg = document.getElementById('tut-copy-msg');
+            msg.classList.remove('hidden');
+            setTimeout(() => msg.classList.add('hidden'), 2000);
         }
 
         // --- Tab Logic ---
@@ -566,7 +580,7 @@
                             <div class="relative flex-shrink-0">
                                 <img id="icon-${key}" src="${item.image || ''}" class="list-icon ${item.image ? '' : 'hidden'} bg-gray-50">
                                 <div id="no-icon-${key}" class="list-icon ${item.image ? 'hidden' : ''} bg-gray-50 flex items-center justify-center text-gray-300 text-2xl"><i class="fa-solid fa-user"></i></div>
-                                <div class="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-gray-100 z-10">
+                                <div class="absolute -bottom-2 -right-4 bg-white rounded-full p-1 shadow-sm border border-gray-100 z-10">
                                     <i class="${config.icon} ${config.color} text-xl w-7 h-7 flex items-center justify-center"></i>
                                 </div>
                             </div>
@@ -612,8 +626,7 @@
                         <div class="text-[10px] text-gray-300 break-all px-4" id="current-url-display"></div>
                     </div>
                     <div class="grid grid-cols-1 gap-3">
-                        <button onclick="reloadAndShowPwaGuide()" class="bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-indigo-700 flex items-center justify-center transform active:scale-95 transition"><i class="fa-solid fa-mobile-screen-button mr-2"></i> アプリをホームに追加 (更新)</button>
-                        <button onclick="showBookmarkGuide()" class="bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 flex items-center justify-center transform active:scale-95 transition"><i class="fa-regular fa-bookmark mr-2"></i> ブックマークに登録</button>
+                        <button onclick="showBookmarkGuide()" class="bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-indigo-700 flex items-center justify-center transform active:scale-95 transition"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> ブラウザで開く / ブックマーク</button>
                     </div>
                     <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
                         <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">データ管理</h3>
