@@ -7,47 +7,57 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chiikuji Meishi">
     <title>Chiikuji Meishi</title>
-    <!-- ホーム画面用アイコン（JSで動的に更新されます） -->
+    <!-- ホーム画面用アイコン -->
     <link rel="apple-touch-icon" id="app-icon-apple" href="">
     <link rel="shortcut icon" id="app-icon-default" href="">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for Icons -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
-        /* カスタムアニメーションとスタイル */
+        /* 基本スタイル */
         body {
             font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-            transition: background-color 0.5s ease, background-image 0.5s ease;
+            transition: background-color 0.5s ease;
             -webkit-tap-highlight-color: transparent;
             background-color: #f8f9fa; 
             min-height: 100vh;
+            overscroll-behavior-y: none; /* バウンススクロール防止 */
         }
 
-        /* 拡大時のアニメーション用クラス */
-        .focused-view {
+        /* --- 拡大ビュー（静的コンテナ） --- */
+        #focus-view-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: 50;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
             background-color: #ffffff;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            padding: 2rem 1rem 7rem 1rem; 
-            animation: fadeIn 0.2s ease-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* 下部のアイコン領域を確保するためにパディングを大きく */
+            padding: 2rem 1rem 8rem 1rem; 
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
         }
 
+        #focus-view-container.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 名刺カード */
         .meishi-card {
             background: rgba(255, 255, 255, 0.90);
             backdrop-filter: blur(12px);
@@ -63,15 +73,21 @@
             text-align: center;
             position: relative;
             border: 1px solid rgba(255,255,255,0.4);
-            transition: transform 0.3s ease, opacity 0.3s ease;
+            /* アニメーション用 */
+            transform: translateY(0);
+            transition: transform 0.1s;
         }
-        
-        .slide-in-right { animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        .slide-in-left { animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideInRight { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideInLeft { from { transform: translateX(-100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        /* アニメーションクラス */
+        .anim-slide-in-right { animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .anim-slide-in-left { animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .anim-slide-up-out { animation: slideUpOut 0.3s ease-in forwards; }
+        .anim-slide-down-in { animation: slideDownIn 0.3s ease-out; }
+
+        @keyframes slideInRight { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideInLeft { from { transform: translateX(-50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideUpOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-100px); opacity: 0; } }
+        @keyframes slideDownIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .qr-code-container img,
         .qr-code-container canvas {
@@ -81,18 +97,85 @@
             border-radius: 4px;
         }
 
-        /* 汎用クラス */
-        .hidden-card { display: none !important; }
+        /* --- 下部ナビゲーション --- */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 110px; /* 高さを十分に確保 */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* 上寄せ */
+            padding-top: 1.5rem;
+            gap: 16px;
+            z-index: 60;
+            overflow-x: auto;
+            scrollbar-width: none;
+            /* 背景グラデーションで浮き出させる */
+            background: linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 100%);
+        }
+        .bottom-nav::-webkit-scrollbar { display: none; }
+
+        .nav-item-wrapper {
+            position: relative;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .nav-item-wrapper:active { transform: scale(0.9); }
         
-        .img-preview {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #e5e7eb;
-            background-color: #fff;
+        .nav-item-wrapper.active { 
+            transform: translateY(-8px) scale(1.1); 
+            z-index: 10;
         }
 
+        .nav-icon {
+            width: 48px; /* 少し大きく */
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.9);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            opacity: 0.7;
+            background-color: #f3f4f6;
+            transition: all 0.3s;
+        }
+        .nav-item-wrapper.active .nav-icon {
+            border-color: #4f46e5;
+            opacity: 1;
+            box-shadow: 0 6px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .platform-badge {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            border: 1px solid rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        /* --- リスト表示 --- */
+        .list-item {
+            transition: transform 0.2s, box-shadow 0.2s;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+        }
+        .list-item:active { transform: scale(0.98); }
+        .hidden-card { display: none !important; }
+        
         .list-icon {
             width: 64px;
             height: 64px;
@@ -102,6 +185,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
+        /* 名刺フォーカス時のアイコン */
         .focus-icon {
             width: 80px;
             height: 80px;
@@ -111,64 +195,17 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        .bottom-nav {
-            position: absolute;
-            bottom: 2rem;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            padding: 0 1rem;
-            z-index: 60;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .bottom-nav::-webkit-scrollbar { display: none; }
-
-        .nav-item-wrapper {
-            position: relative;
-            flex-shrink: 0;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .nav-item-wrapper:active { transform: scale(0.95); }
-        .nav-item-wrapper.active { transform: translateY(-4px); }
-
-        .nav-icon {
-            width: 40px;
-            height: 40px;
+        /* 画像プレビュー */
+        .img-preview {
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid rgba(255,255,255,0.8);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            opacity: 0.6;
-            background-color: #f3f4f6;
-        }
-        .nav-item-wrapper.active .nav-icon {
-            border-color: #4f46e5;
-            opacity: 1;
-            box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+            border: 2px solid #e5e7eb;
+            background-color: #fff;
         }
 
-        .platform-badge {
-            position: absolute;
-            bottom: -2px;
-            right: -2px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background-color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            border: 1px solid rgba(0,0,0,0.1);
-            z-index: 10;
-        }
-
+        /* タブ */
         .tab-active {
             border-bottom: 3px solid #4f46e5;
             color: #4f46e5;
@@ -180,13 +217,7 @@
             font-weight: 500;
         }
 
-        .list-item {
-            transition: transform 0.2s, box-shadow 0.2s;
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(4px);
-        }
-        .list-item:active { transform: scale(0.98); }
-
+        /* カラーボタン */
         .color-btn {
             width: 32px;
             height: 32px;
@@ -198,7 +229,7 @@
         .color-btn:hover { transform: scale(1.1); }
         .color-btn.selected { border-color: #4f46e5; transform: scale(1.1); box-shadow: 0 0 0 2px #c7d2fe; }
 
-        /* ブランド別カラー定義 (CSSクラス用フォールバック) */
+        /* ブランドカラーCSSクラス */
         .text-red-600 { color: #dc2626; }
         .text-pink-600 { color: #db2777; }
         .text-blue-600 { color: #2563eb; }
@@ -237,39 +268,23 @@
     <!-- 設定モーダル -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md h-[90vh] flex flex-col">
-            <!-- モーダルヘッダー -->
             <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
                 <h2 class="font-bold text-gray-700">設定</h2>
                 <button onclick="closeSettings()" class="text-gray-400 hover:text-gray-600">
                     <i class="fa-solid fa-times text-xl"></i>
                 </button>
             </div>
-
-            <!-- モーダル内のタブ切り替え -->
             <div class="flex border-b bg-white">
-                <button onclick="switchSettingsTab('account1')" id="set-tab-account1" class="flex-1 py-3 text-xs font-bold text-center border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50 truncate px-1">
-                    Account 1
-                </button>
-                <button onclick="switchSettingsTab('account2')" id="set-tab-account2" class="flex-1 py-3 text-xs font-bold text-center border-b-2 border-transparent text-gray-500 hover:bg-gray-50 truncate px-1">
-                    Account 2
-                </button>
+                <button onclick="switchSettingsTab('account1')" id="set-tab-account1" class="flex-1 py-3 text-xs font-bold text-center border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50 truncate px-1">Account 1</button>
+                <button onclick="switchSettingsTab('account2')" id="set-tab-account2" class="flex-1 py-3 text-xs font-bold text-center border-b-2 border-transparent text-gray-500 hover:bg-gray-50 truncate px-1">Account 2</button>
             </div>
-            
-            <!-- 設定フォームコンテナ -->
             <div class="flex-1 overflow-y-auto p-4 bg-gray-50">
-                
-                <!-- 基本設定セクション -->
                 <div class="bg-white p-5 rounded-xl shadow-sm mb-6 border border-indigo-100">
                     <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4 border-b pb-2">基本設定</h3>
-                    
-                    <!-- タブ名変更 -->
                     <div class="mb-5">
                         <label class="block text-xs font-bold text-gray-600 mb-1">タブの名称</label>
-                        <input type="text" id="setting-tab-name" placeholder="例: 本垢, 趣味垢" 
-                            class="w-full text-sm p-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition">
+                        <input type="text" id="setting-tab-name" placeholder="例: 本垢, 趣味垢" class="w-full text-sm p-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition">
                     </div>
-
-                    <!-- アプリのテーマカラー設定 -->
                     <div class="mb-5">
                         <label class="block text-xs font-bold text-gray-600 mb-2">アプリ全体のテーマカラー</label>
                         <div class="flex flex-wrap gap-3 mb-2">
@@ -285,8 +300,6 @@
                         </div>
                         <input type="hidden" id="setting-theme-color" value="#f8f9fa">
                     </div>
-
-                    <!-- 名刺壁紙設定 -->
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-2">名刺拡大時の背景画像</label>
                         <div class="flex items-center space-x-3">
@@ -298,143 +311,97 @@
                                     <i class="fa-solid fa-image mr-1"></i> 画像を選択
                                     <input type="file" accept="image/*" class="hidden" onchange="handleBgUpload(this)">
                                 </label>
-                                <button type="button" onclick="clearBg()" id="btn-clear-bg" class="text-xs text-red-400 hover:text-red-600 hidden text-left px-1">
-                                    <i class="fa-solid fa-trash mr-1"></i>削除
-                                </button>
+                                <button type="button" onclick="clearBg()" id="btn-clear-bg" class="text-xs text-red-400 hover:text-red-600 hidden text-left px-1"><i class="fa-solid fa-trash mr-1"></i>削除</button>
                             </div>
                         </div>
                         <input type="hidden" id="setting-bg-data">
                     </div>
                 </div>
-
-                <!-- アカウントリンク設定 -->
                 <div class="flex items-center justify-between mb-4 mt-6 px-1">
                     <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">リンク設定・QR色変更</p>
                 </div>
-
-                <!-- フォーム生成エリア -->
-                <div id="settings-forms-container">
-                    <!-- JSで動的に生成されます -->
-                </div>
-                
-                <!-- ホーム画面追加ボタン -->
+                <div id="settings-forms-container"></div>
                 <div class="mt-8 mb-4 text-center">
-                    <button onclick="showAddToHomeGuide()" class="text-xs text-gray-500 hover:text-indigo-600 underline">
-                        <i class="fa-solid fa-mobile-screen-button mr-1"></i>ホーム画面にアイコンを追加するには
-                    </button>
+                    <button onclick="showAddToHomeGuide()" class="text-xs text-gray-500 hover:text-indigo-600 underline"><i class="fa-solid fa-mobile-screen-button mr-1"></i>ホーム画面にアイコンを追加するには</button>
                 </div>
-
-                <!-- データバックアップ・復元 -->
                 <div class="mt-8 pt-6 border-t border-gray-200">
                     <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 text-center">データ管理（バックアップ）</h3>
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="exportData()" class="bg-gray-100 text-gray-600 text-xs font-bold py-3 rounded-lg hover:bg-gray-200 flex flex-col items-center justify-center space-y-1">
-                            <i class="fa-solid fa-file-export text-lg"></i>
-                            <span>ファイルに書き出し</span>
-                        </button>
-                        <label class="cursor-pointer bg-gray-100 text-gray-600 text-xs font-bold py-3 rounded-lg hover:bg-gray-200 flex flex-col items-center justify-center space-y-1">
-                            <i class="fa-solid fa-file-import text-lg"></i>
-                            <span>ファイルから読み込み</span>
-                            <input type="file" accept=".json" class="hidden" onchange="importData(this)">
-                        </label>
+                        <button onclick="exportData()" class="bg-gray-100 text-gray-600 text-xs font-bold py-3 rounded-lg hover:bg-gray-200 flex flex-col items-center justify-center space-y-1"><i class="fa-solid fa-file-export text-lg"></i><span>ファイルに書き出し</span></button>
+                        <label class="cursor-pointer bg-gray-100 text-gray-600 text-xs font-bold py-3 rounded-lg hover:bg-gray-200 flex flex-col items-center justify-center space-y-1"><i class="fa-solid fa-file-import text-lg"></i><span>ファイルから読み込み</span><input type="file" accept=".json" class="hidden" onchange="importData(this)"></label>
                     </div>
                     <p class="text-[10px] text-gray-400 mt-2 text-center">※ 機種変更時などは、書き出したファイルを新しい端末で読み込んでください。</p>
                 </div>
-
-                <!-- アプリシェアQRコード -->
                 <div class="mt-8 pt-6 border-t border-gray-200 text-center">
                     <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-4">このアプリをシェアする</h3>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 inline-block">
                         <div id="share-app-qr" class="qr-code-container"></div>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-3 px-4">
-                        このQRコードを読み取ると、<br>現在開いているアプリのページを開けます。<br>
-                        （友人にアプリを教える時に使ってください）
-                    </p>
+                    <p class="text-[10px] text-gray-400 mt-3 px-4">このQRコードを読み取ると、<br>現在開いているアプリのページを開けます。</p>
                     <div class="mt-2 text-[10px] text-gray-300 break-all px-4" id="current-url-display"></div>
                 </div>
-
                 <div class="h-8"></div>
             </div>
-
-            <!-- 保存ボタン -->
             <div class="p-4 border-t bg-white rounded-b-2xl shadow-inner z-10">
-                <button onclick="saveAndRegenerate()" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-indigo-700 transform active:scale-95 transition flex justify-center items-center">
-                    <i class="fa-solid fa-check mr-2"></i> 保存して更新
-                </button>
+                <button onclick="saveAndRegenerate()" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-indigo-700 transform active:scale-95 transition flex justify-center items-center"><i class="fa-solid fa-check mr-2"></i> 保存して更新</button>
             </div>
         </div>
     </div>
 
-    <!-- ホーム画面追加ガイドモーダル -->
     <div id="pwa-guide-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-6" onclick="closeAddToHomeGuide()">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onclick="event.stopPropagation()">
-            <button onclick="closeAddToHomeGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-times text-xl"></i>
-            </button>
-            
+            <button onclick="closeAddToHomeGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
             <div class="text-center mb-6">
                 <i class="fa-solid fa-share-nodes text-4xl text-indigo-500 mb-3"></i>
                 <h3 class="text-lg font-bold text-gray-800">ホーム画面に追加</h3>
             </div>
-            
             <div class="space-y-6 text-sm text-gray-600">
-                <div>
-                    <h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-apple text-lg mr-2"></i> iPhone</h4>
-                    <ol class="list-decimal list-inside space-y-1 pl-1"><li>共有ボタン <i class="fa-solid fa-arrow-up-from-bracket mx-1"></i> をタップ</li><li>「ホーム画面に追加」を選択</li></ol>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-android text-lg mr-2 text-green-600"></i> Android</h4>
-                    <ol class="list-decimal list-inside space-y-1 pl-1"><li>メニュー <i class="fa-solid fa-ellipsis-vertical mx-1"></i> をタップ</li><li>「ホーム画面に追加」を選択</li></ol>
-                </div>
+                <div><h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-apple text-lg mr-2"></i> iPhone</h4><ol class="list-decimal list-inside space-y-1 pl-1"><li>共有ボタン <i class="fa-solid fa-arrow-up-from-bracket mx-1"></i> をタップ</li><li>「ホーム画面に追加」を選択</li></ol></div>
+                <div><h4 class="font-bold text-gray-800 mb-2 flex items-center"><i class="fa-brands fa-android text-lg mr-2 text-green-600"></i> Android</h4><ol class="list-decimal list-inside space-y-1 pl-1"><li>メニュー <i class="fa-solid fa-ellipsis-vertical mx-1"></i> をタップ</li><li>「ホーム画面に追加」を選択</li></ol></div>
             </div>
-            
-            <div class="mt-6 text-center">
-                <button onclick="closeAddToHomeGuide()" class="bg-gray-100 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200">閉じる</button>
-            </div>
+            <div class="mt-6 text-center"><button onclick="closeAddToHomeGuide()" class="bg-gray-100 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-200">閉じる</button></div>
         </div>
     </div>
 
     <!-- メインコンテンツエリア -->
     <main class="max-w-md mx-auto p-4 pt-6">
-        
-        <!-- プロンプト: データがない場合の表示 -->
         <div id="empty-state" class="hidden text-center py-10">
             <div class="bg-white/80 backdrop-blur rounded-xl p-8 shadow-sm border border-white/50">
                 <i class="fa-solid fa-qrcode text-5xl text-gray-300 mb-4"></i>
                 <p class="text-gray-500 text-sm mb-6">リンクが設定されていません</p>
-                <button onclick="openSettings()" class="bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium shadow-sm">
-                    設定画面へ
-                </button>
+                <button onclick="openSettings()" class="bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium shadow-sm">設定画面へ</button>
             </div>
         </div>
-
-        <!-- リスト表示エリア -->
         <div id="qr-list" class="space-y-3 pb-8"></div>
     </main>
 
-    <!-- フォーカスビューのオーバーレイ（名刺ビュー） -->
-    <div id="focus-overlay" class="hidden">
-        <!-- JSで注入 -->
+    <!-- フォーカスビューのオーバーレイ（静的構造） -->
+    <div id="focus-view-container" onclick="closeFocus()">
+        <div id="focus-card" class="meishi-card" onclick="event.stopPropagation()">
+            <div id="focus-icon-container" class="mb-4">
+                <!-- Icon injected here -->
+            </div>
+            <h2 id="focus-name" class="text-lg font-bold text-gray-800 mb-2 leading-tight line-clamp-2"></h2>
+            <div id="focus-label-container" class="flex items-center justify-center text-gray-500 mb-6 text-xs font-bold uppercase tracking-widest">
+                <!-- Label injected here -->
+            </div>
+            <div id="focus-qr-target" class="qr-code-container bg-white p-2 rounded-xl shadow-inner border border-gray-100 mb-6"></div>
+            <button onclick="closeFocus()" class="mt-2 text-gray-400 text-sm hover:text-gray-600">
+                <i class="fa-solid fa-xmark mr-1"></i> 閉じる (上スワイプ)
+            </button>
+        </div>
+        <div id="focus-bottom-nav" class="bottom-nav" onclick="event.stopPropagation()">
+            <!-- Nav items injected here -->
+        </div>
     </div>
 
     <script>
-        // 設定キーを新規リリース版に変更
         const STORAGE_KEY = 'chiikuji_meishi_release_v1';
         
-        // 項目定義
         const platformKeys = [
-            'youtube1', 
-            'youtube2', 
-            'instagram', 
-            'x', 
-            'tiktok', 
-            'facebook', 
-            'homepage', 
-            'blog'
+            'youtube1', 'youtube2', 'instagram', 'x', 'tiktok', 'facebook', 'homepage', 'blog'
         ];
 
-        // 設定定義（アイコンクラスを完全な形で定義して表示崩れを防止）
         const platformConfig = {
             'youtube1': { label: 'YouTube (Main)', icon: 'fa-brands fa-youtube', color: 'text-red-600', badgeClass: 'text-red-600', badgeBg: 'bg-white', defaultQrColor: '#CD201F' },
             'youtube2': { label: 'YouTube (Sub)', icon: 'fa-brands fa-youtube', color: 'text-red-600', badgeClass: 'text-red-600', badgeBg: 'bg-white', defaultQrColor: '#CD201F' },
@@ -453,32 +420,41 @@
             account2: { config: { tabName: 'Account 2', bgImage: '', themeColor: '#f8f9fa' } }
         };
 
-        // スワイプ操作用の変数
         let touchStartX = 0;
+        let touchStartY = 0;
         let touchEndX = 0;
+        let touchEndY = 0;
         let currentFocusKey = null;
+
+        // DOM Elements
+        const focusContainer = document.getElementById('focus-view-container');
+        const focusCardEl = document.getElementById('focus-card');
+        const focusNameEl = document.getElementById('focus-name');
+        const focusIconContainer = document.getElementById('focus-icon-container');
+        const focusLabelContainer = document.getElementById('focus-label-container');
+        const focusQrTarget = document.getElementById('focus-qr-target');
+        const focusBottomNav = document.getElementById('focus-bottom-nav');
 
         const modal = document.getElementById('settings-modal');
         const listContainer = document.getElementById('qr-list');
         const emptyState = document.getElementById('empty-state');
-        const focusOverlay = document.getElementById('focus-overlay');
         const settingsContainer = document.getElementById('settings-forms-container');
         const body = document.getElementById('app-body');
         const guideModal = document.getElementById('pwa-guide-modal');
 
         window.addEventListener('load', () => {
             loadData();
+            // Touch event listeners for the focus view
+            focusContainer.addEventListener('touchstart', handleTouchStart, {passive: true});
+            focusContainer.addEventListener('touchend', handleTouchEnd);
         });
 
-        // ---------------------------------------------------------
-        // UI初期化・構築
-        // ---------------------------------------------------------
+        // --- Logic ---
 
         function initializeList() {
             listContainer.innerHTML = '';
             platformKeys.forEach(key => {
                 const config = platformConfig[key];
-                // config.iconをそのままクラスとして使用
                 const itemHtml = `
                     <div id="card-${key}" class="list-item rounded-2xl shadow-sm p-4 flex items-center space-x-4 cursor-pointer border border-white/50 hidden-card" onclick="focusCard('${key}')">
                         <div class="relative flex-shrink-0">
@@ -498,6 +474,188 @@
                 listContainer.insertAdjacentHTML('beforeend', itemHtml);
             });
         }
+
+        function focusCard(key) {
+            currentFocusKey = key;
+            updateFocusContent(key, 'in'); // 'in' is simple fade in
+            focusContainer.classList.add('active');
+        }
+
+        // 拡大画面のコンテンツのみ更新（スムーズ化の肝）
+        function updateFocusContent(key, animType = '') {
+            const data = appData[currentTab] || {};
+            const item = data[key];
+            if (!item || !item.url) return;
+
+            const config = platformConfig[key];
+            const tabConfig = data.config || {};
+            
+            // 背景画像更新（親コンテナ）
+            focusContainer.style.backgroundImage = tabConfig.bgImage ? `url('${tabConfig.bgImage}')` : '';
+
+            // アニメーション適用
+            focusCardEl.className = 'meishi-card'; // reset classes
+            void focusCardEl.offsetWidth; // trigger reflow
+            
+            if (animType === 'next') focusCardEl.classList.add('anim-slide-in-right');
+            else if (animType === 'prev') focusCardEl.classList.add('anim-slide-in-left');
+            else if (animType === 'down') focusCardEl.classList.add('anim-slide-down-in');
+            
+            // アイコン
+            if (item.image) {
+                focusIconContainer.innerHTML = `<img src="${item.image}" class="focus-icon">`;
+            } else {
+                focusIconContainer.innerHTML = `<div class="focus-icon bg-gray-50 flex items-center justify-center text-4xl text-gray-300"><i class="fa-solid fa-user"></i></div>`;
+            }
+
+            // テキスト
+            focusNameEl.textContent = item.name || config.label;
+            focusLabelContainer.innerHTML = `<i class="${config.icon} ${config.color} mr-2"></i> ${config.label}`;
+
+            // QRコード
+            focusQrTarget.innerHTML = '';
+            new QRCode(focusQrTarget, {
+                text: item.url,
+                width: 256,
+                height: 256,
+                colorDark : item.qrColor || config.defaultQrColor || "#000000",
+                colorLight : item.qrBgColor || "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            // 下部ナビゲーションの再構築
+            renderFocusNav(data, key);
+        }
+
+        function renderFocusNav(data, activeKey) {
+            const activeKeys = platformKeys.filter(k => data[k] && data[k].url);
+            let navHtml = '';
+            
+            activeKeys.forEach(k => {
+                const navItem = data[k];
+                const isActive = k === activeKey ? 'active' : '';
+                const navConfig = platformConfig[k];
+                
+                let navIconImg = navItem.image 
+                    ? `<img src="${navItem.image}" class="nav-icon">`
+                    : `<div class="nav-icon flex items-center justify-center text-gray-400 text-lg"><i class="fa-solid fa-user"></i></div>`;
+                
+                const badgeHtml = `<div class="platform-badge ${navConfig.badgeBg} ${navConfig.badgeClass}"><i class="${navConfig.icon}"></i></div>`;
+                
+                navHtml += `
+                    <div class="nav-item-wrapper ${isActive}" onclick="event.stopPropagation(); switchTo('${k}')">
+                        ${navIconImg}
+                        ${badgeHtml}
+                    </div>
+                `;
+            });
+            focusBottomNav.innerHTML = navHtml;
+        }
+
+        function switchTo(key) {
+            if (key === currentFocusKey) return;
+            const activeKeys = platformKeys.filter(k => appData[currentTab][k]?.url);
+            const curIdx = activeKeys.indexOf(currentFocusKey);
+            const newIdx = activeKeys.indexOf(key);
+            const dir = newIdx > curIdx ? 'next' : 'prev';
+            currentFocusKey = key;
+            updateFocusContent(key, dir);
+        }
+
+        // --- Swipe Logic ---
+        
+        function handleTouchStart(e) { 
+            touchStartX = e.touches[0].clientX; 
+            touchStartY = e.touches[0].clientY;
+        }
+        function handleTouchEnd(e) { 
+            touchEndX = e.changedTouches[0].clientX; 
+            touchEndY = e.changedTouches[0].clientY;
+            handleSwipeGesture(); 
+        }
+
+        function handleSwipeGesture() {
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
+            const threshold = 50; 
+
+            // 垂直スワイプ判定 (Vertical)
+            if (Math.abs(diffY) > Math.abs(diffX)) {
+                if (diffY > threshold) {
+                    // 上スワイプ (Swipe Up) -> 閉じる
+                    focusCardEl.classList.add('anim-slide-up-out');
+                    setTimeout(() => { closeFocus(); }, 250);
+                } else if (diffY < -threshold) {
+                    // 下スワイプ (Swipe Down) -> アカウント切り替え
+                    switchAccountInFocus();
+                }
+                return;
+            }
+
+            // 水平スワイプ判定 (Horizontal)
+            if (Math.abs(diffX) < threshold) return;
+
+            const data = appData[currentTab];
+            const activeKeys = platformKeys.filter(k => data[k] && data[k].url);
+            if (activeKeys.length <= 1) return;
+
+            const currentIndex = activeKeys.indexOf(currentFocusKey);
+            
+            if (diffX > 0) {
+                // Next
+                const nextIndex = (currentIndex + 1) % activeKeys.length;
+                currentFocusKey = activeKeys[nextIndex];
+                updateFocusContent(currentFocusKey, 'next');
+            } else {
+                // Prev
+                const prevIndex = (currentIndex - 1 + activeKeys.length) % activeKeys.length;
+                currentFocusKey = activeKeys[prevIndex];
+                updateFocusContent(currentFocusKey, 'prev');
+            }
+        }
+
+        function switchAccountInFocus() {
+            // アカウント切り替えロジック
+            const nextTab = currentTab === 'account1' ? 'account2' : 'account1';
+            const nextData = appData[nextTab];
+            
+            // 切り替え先のアカウントにデータがあるかチェック
+            const hasData = platformKeys.some(k => nextData[k] && nextData[k].url);
+            if (!hasData) return; // データがなければ何もしない
+
+            // 現在と同じキーがあるか？
+            let nextKey = currentFocusKey;
+            if (!nextData[nextKey] || !nextData[nextKey].url) {
+                // なければ一番最初の有効なキーを探す
+                const activeKeys = platformKeys.filter(k => nextData[k] && nextData[k].url);
+                if (activeKeys.length > 0) {
+                    nextKey = activeKeys[0];
+                } else {
+                    return; 
+                }
+            }
+
+            // 実行
+            currentTab = nextTab;
+            currentFocusKey = nextKey;
+            
+            // 裏側のリストも更新しておく（閉じたときのため）
+            updateTabUI();
+            renderList();
+            const theme = appData[currentTab].config?.themeColor || '#f8f9fa';
+            applyTheme(theme);
+
+            // 拡大画面を更新 (アニメーションは上から降ってくるイメージで 'down' とするが、今回は再利用)
+            updateFocusContent(nextKey, 'down');
+        }
+
+        function closeFocus() {
+            focusContainer.classList.remove('active');
+            focusCardEl.classList.remove('anim-slide-up-out'); // cleanup
+            currentFocusKey = null;
+        }
+
+        // --- Standard Functions ---
 
         function renderSettingsForm(tabName) {
             settingsContainer.innerHTML = '';
@@ -586,15 +744,9 @@
             });
         }
 
-        // ---------------------------------------------------------
-        // ホーム画面アイコン自動設定
-        // ---------------------------------------------------------
         function updateAppIcons() {
-            // アイコン候補を探す順序 (Account1 -> Account2)
-            const searchOrder = platformKeys; // youtube1, youtube2, ...
+            const searchOrder = platformKeys;
             let targetImage = null;
-
-            // Account 1 から検索
             if (appData.account1) {
                 for (const key of searchOrder) {
                     if (appData.account1[key]?.image) {
@@ -603,8 +755,6 @@
                     }
                 }
             }
-            
-            // 見つからなければ Account 2 から検索
             if (!targetImage && appData.account2) {
                 for (const key of searchOrder) {
                     if (appData.account2[key]?.image) {
@@ -613,8 +763,6 @@
                     }
                 }
             }
-
-            // アイコンタグにセット
             if (targetImage) {
                 const appleIcon = document.getElementById('app-icon-apple');
                 const defaultIcon = document.getElementById('app-icon-default');
@@ -627,11 +775,9 @@
             const container = document.getElementById('share-app-qr');
             const urlDisplay = document.getElementById('current-url-display');
             if(!container) return;
-            
             const currentURL = window.location.href.split('#')[0];
             container.innerHTML = '';
             urlDisplay.textContent = currentURL;
-
             new QRCode(container, {
                 text: currentURL,
                 width: 128,
@@ -650,7 +796,6 @@
         function updateColorButtons(activeColor) {
             document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('selected'));
             document.getElementById('custom-theme-color').value = activeColor;
-            
             const btns = document.querySelectorAll('.color-btn');
             for(let btn of btns) {
                 if (rgbToHex(btn.style.backgroundColor) === activeColor.toLowerCase() || btn.style.backgroundColor === activeColor) {
@@ -713,14 +858,14 @@
                 try {
                     const importedData = JSON.parse(e.target.result);
                     if (importedData.account1 && importedData.account2) {
-                        if (confirm('現在のデータを上書きして読み込みますか？（この操作は取り消せません）')) {
+                        if (confirm('現在のデータを上書きして読み込みますか？')) {
                             appData = importedData;
                             localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
                             alert('データを読み込みました。画面を更新します。');
                             location.reload();
                         }
                     } else {
-                        alert('無効なファイル形式です。正しいバックアップファイルを選択してください。');
+                        alert('無効なファイル形式です。');
                     }
                 } catch (err) {
                     alert('ファイルの読み込みに失敗しました。');
@@ -757,45 +902,30 @@
             }
         }
 
-        function switchSettingsTab(tabName) {
-            saveTempFormData(currentSettingsTab);
-            currentSettingsTab = tabName;
+        function updateSettingsTabUI() {
             const name1 = appData.account1.config?.tabName || 'Account 1';
             const name2 = appData.account2.config?.tabName || 'Account 2';
             document.getElementById('set-tab-account1').textContent = name1;
             document.getElementById('set-tab-account2').textContent = name2;
             const activeClass = "flex-1 py-3 text-xs font-bold text-center border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50 truncate px-1";
             const inactiveClass = "flex-1 py-3 text-xs font-bold text-center border-b-2 border-transparent text-gray-500 hover:bg-gray-50 truncate px-1";
-            document.getElementById('set-tab-account1').className = tabName === 'account1' ? activeClass : inactiveClass;
-            document.getElementById('set-tab-account2').className = tabName === 'account2' ? activeClass : inactiveClass;
-            renderSettingsForm(tabName);
+            document.getElementById('set-tab-account1').className = currentSettingsTab === 'account1' ? activeClass : inactiveClass;
+            document.getElementById('set-tab-account2').className = currentSettingsTab === 'account2' ? activeClass : inactiveClass;
         }
 
-        function copyProfileFromMain(tabName, targetKey) {
-            const mainKey = platformKeys[0]; 
-            const nameInput = document.getElementById(`name-${tabName}-${mainKey}`);
-            const imgInput = document.getElementById(`img-data-${tabName}-${mainKey}`);
-            if (!nameInput || !imgInput) return;
-            document.getElementById(`name-${tabName}-${targetKey}`).value = nameInput.value;
-            document.getElementById(`img-data-${tabName}-${targetKey}`).value = imgInput.value;
-            const preview = document.getElementById(`preview-${tabName}-${targetKey}`);
-            const noPreview = document.getElementById(`no-preview-${tabName}-${targetKey}`);
-            const clearBtn = document.getElementById(`clear-${tabName}-${targetKey}`);
-            if (imgInput.value) {
-                preview.src = imgInput.value;
-                preview.classList.remove('hidden');
-                noPreview.classList.add('hidden');
-                clearBtn.classList.remove('hidden');
-            } else {
-                preview.classList.add('hidden');
-                noPreview.classList.remove('hidden');
-                clearBtn.classList.add('hidden');
+        function switchSettingsTab(tabName) {
+            if (!modal.classList.contains('hidden')) {
+                saveTempFormData(currentSettingsTab);
             }
+            currentSettingsTab = tabName;
+            updateSettingsTabUI();
+            renderSettingsForm(tabName);
         }
 
         function openSettings() {
             currentSettingsTab = currentTab;
-            switchSettingsTab(currentTab);
+            updateSettingsTabUI();
+            renderSettingsForm(currentTab);
             renderShareQR();
             modal.classList.remove('hidden');
         }
@@ -811,6 +941,7 @@
             const tabNameInput = document.getElementById('setting-tab-name');
             const bgInput = document.getElementById('setting-bg-data');
             const themeInput = document.getElementById('setting-theme-color');
+            if (!tabNameInput) return;
             if (!appData[tabName]) appData[tabName] = {};
             if (!appData[tabName].config) appData[tabName].config = {};
             if(tabNameInput) appData[tabName].config.tabName = tabNameInput.value.trim();
@@ -835,7 +966,7 @@
             saveTempFormData(currentSettingsTab);
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-                updateAppIcons(); // 保存時にアイコン更新
+                updateAppIcons();
                 closeSettings();
                 switchTab(currentSettingsTab);
             } catch (e) {
@@ -847,7 +978,6 @@
         function loadData() {
             initializeList(); 
             const stored = localStorage.getItem(STORAGE_KEY);
-            // 旧バージョンのデータ移行ロジックは削除しました (Version 1)
             if (stored) {
                 try {
                     appData = JSON.parse(stored);
@@ -859,7 +989,7 @@
             applyTheme(theme);
             updateTabUI();
             renderList();
-            updateAppIcons(); // 起動時にアイコン更新
+            updateAppIcons();
         }
 
         function handleImageUpload(input, tabName, key) {
@@ -959,84 +1089,6 @@
                 listContainer.classList.remove('hidden');
                 emptyState.classList.add('hidden');
             }
-        }
-
-        function focusCard(key) {
-            currentFocusKey = key;
-            renderFocusView();
-            focusOverlay.classList.remove('hidden');
-        }
-
-        function renderFocusView(direction = '') {
-            const data = appData[currentTab] || {};
-            const item = data[currentFocusKey];
-            if (!item || !item.url) return;
-            const config = platformConfig[currentFocusKey];
-            const displayName = item.name || config.label;
-            const tabConfig = data.config || {};
-            const bgImage = tabConfig.bgImage ? `background-image: url('${tabConfig.bgImage}');` : '';
-            let animClass = '';
-            if (direction === 'next') animClass = 'slide-in-right';
-            if (direction === 'prev') animClass = 'slide-in-left';
-            let imageHtml = item.image ? `<img src="${item.image}" class="focus-icon mb-4">` : `<div class="focus-icon mb-4 bg-gray-50 flex items-center justify-center text-4xl text-gray-300"><i class="fa-solid fa-user"></i></div>`;
-            const activeKeys = platformKeys.filter(k => data[k] && data[k].url);
-            let navHtml = '';
-            activeKeys.forEach(k => {
-                const navItem = data[k];
-                const isActive = k === currentFocusKey ? 'active' : '';
-                const navConfig = platformConfig[k]; 
-                let navIconImg = navItem.image ? `<img src="${navItem.image}" class="nav-icon">` : `<div class="nav-icon flex items-center justify-center text-gray-400 text-lg"><i class="fa-solid fa-user"></i></div>`;
-                const badgeHtml = `<div class="platform-badge ${navConfig.badgeBg} ${navConfig.badgeClass}"><i class="${navConfig.icon}"></i></div>`;
-                navHtml += `<div class="nav-item-wrapper ${isActive}" onclick="event.stopPropagation(); switchTo('${k}')">${navIconImg}${badgeHtml}</div>`;
-            });
-            focusOverlay.innerHTML = `<div id="focus-content-wrapper" class="focused-view" style="${bgImage}" ontouchstart="handleTouchStart(event)" ontouchmove="handleTouchMove(event)" ontouchend="handleTouchEnd(event)" onclick="closeFocus()"><div class="meishi-card ${animClass}" onclick="event.stopPropagation()">${imageHtml}<h2 class="text-2xl font-bold text-gray-800 mb-2 leading-tight line-clamp-2">${displayName}</h2><div class="flex items-center justify-center text-gray-500 mb-6 text-xs font-bold uppercase tracking-widest"><i class="${config.icon} ${config.color} mr-2"></i> ${config.label}</div><div id="focus-qr-target" class="qr-code-container bg-white p-2 rounded-xl shadow-inner border border-gray-100 mb-6"></div><button onclick="closeFocus()" class="mt-2 text-gray-400 text-sm hover:text-gray-600"><i class="fa-solid fa-xmark mr-1"></i> 閉じる</button></div><div class="bottom-nav" onclick="event.stopPropagation()">${navHtml}</div></div>`;
-            const target = document.getElementById('focus-qr-target');
-            new QRCode(target, {
-                text: item.url,
-                width: 256,
-                height: 256,
-                colorDark : item.qrColor || config.defaultQrColor || "#000000",
-                colorLight : item.qrBgColor || "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-        }
-
-        function switchTo(key) {
-            if (key === currentFocusKey) return;
-            const activeKeys = platformKeys.filter(k => appData[currentTab][k]?.url);
-            const curIdx = activeKeys.indexOf(currentFocusKey);
-            const newIdx = activeKeys.indexOf(key);
-            const dir = newIdx > curIdx ? 'next' : 'prev';
-            currentFocusKey = key;
-            renderFocusView(dir);
-        }
-
-        function handleTouchStart(e) { touchStartX = e.touches[0].clientX; }
-        function handleTouchMove(e) { }
-        function handleTouchEnd(e) { touchEndX = e.changedTouches[0].clientX; handleSwipeGesture(); }
-        function handleSwipeGesture() {
-            const diff = touchStartX - touchEndX;
-            const threshold = 50; 
-            if (Math.abs(diff) < threshold) return;
-            const data = appData[currentTab];
-            const activeKeys = platformKeys.filter(k => data[k] && data[k].url);
-            if (activeKeys.length <= 1) return;
-            const currentIndex = activeKeys.indexOf(currentFocusKey);
-            if (diff > 0) {
-                const nextIndex = (currentIndex + 1) % activeKeys.length;
-                currentFocusKey = activeKeys[nextIndex];
-                renderFocusView('next');
-            } else {
-                const prevIndex = (currentIndex - 1 + activeKeys.length) % activeKeys.length;
-                currentFocusKey = activeKeys[prevIndex];
-                renderFocusView('prev');
-            }
-        }
-
-        function closeFocus() {
-            focusOverlay.classList.add('hidden');
-            focusOverlay.innerHTML = '';
-            currentFocusKey = null;
         }
     </script>
 </body>
